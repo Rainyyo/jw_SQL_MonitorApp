@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MonitorApp.Model;
 using System.Windows;
+using OfficeOpenXml;
 
 namespace MonitorApp.ViewModels
 {
@@ -33,9 +34,6 @@ namespace MonitorApp.ViewModels
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private CancellationTokenSource source1;
         MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder();
-        List<报警信息> 报警信息List = new List<报警信息>();
-        List<上升沿> 上升沿List = new List<上升沿>();
-        string cmd = "";
         #endregion
         #region 属性
         private string _title = "MonitorApp";
@@ -134,8 +132,16 @@ namespace MonitorApp.ViewModels
                 if (ID != null)
                 {
                     InOutTime = "上机";
-                    Global.Insert_pc_data_emp(ID, Name, "INTIME", "上机");
-                    addMessage($"上机操作：\t{ID}\t{Name}");
+                     var res= Global.Insert_pc_data_emp(ID, Name, "INTIME", "上机");
+                    if (res=="ok")
+                    {
+                        addMessage($"上机操作：\t{ID}\t{Name}");
+                    }
+                    else
+                    {
+                        addMessage("数据库错误:" + res);
+                    }
+                   
                 }
                 else
                 {
@@ -147,8 +153,15 @@ namespace MonitorApp.ViewModels
                 if (ID != null)
                 {
                     InOutTime = "下机";
-                    Global.Insert_pc_data_emp(ID, Name, "OUTTIME", "下机");
-                    addMessage($"下机操作：\t{ID}\t{Name}");
+                    var res = Global.Insert_pc_data_emp(ID, Name, "OUTTIME", "下机");
+                    if (res == "ok")
+                    {
+                        addMessage($"下机操作：\t{ID}\t{Name}");
+                    }
+                    else
+                    {
+                        addMessage("数据库错误:" + res);
+                    }
                 }
                 else
                 {
@@ -156,9 +169,6 @@ namespace MonitorApp.ViewModels
                 }
             }
         }
-
-
-
         void ExecuteTestCommand(string obj)
         {
             //初始化连接实例
@@ -216,7 +226,6 @@ namespace MonitorApp.ViewModels
                 Properties.Settings.Default.Save();
             }
         }
-
         void ExecuteAppLoadedEventCommand()
         {
             FileName = Properties.Settings.Default.Filer;
@@ -269,6 +278,7 @@ namespace MonitorApp.ViewModels
         }
         void ExecuteAppClosedEventCommand()
         {
+            var res = Global.Insert_pc_data_emp(ID, Name, "OUTTIME", "下机");
             addMessage("软件关闭!");
             pLC.Close();
         }
@@ -277,6 +287,7 @@ namespace MonitorApp.ViewModels
         public MainWindowViewModel(IContainerProvider containerProvider)
         {
             pLC = containerProvider.Resolve<IPLCService>("PLC");//初始化
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             MySQL_ConnectionMsg();
             Global.Ini();
         }
@@ -300,39 +311,6 @@ namespace MonitorApp.ViewModels
         private void PLCReadAction(CancellationToken token)
         {
 
-        }
-        private void ReadWaring(string path)
-        {
-            if (pLC.Connected)
-            {
-                var lines = File.ReadAllLines(path);
-                foreach (var line in lines)
-                {
-                    string[] res = line.Split('\t');
-                    报警信息List.Add(new 报警信息()
-                    {
-                        报警地址 = ushort.Parse(line.Split('\t')[0].Replace("M", "")),
-                        报警内容 = line.Split('\t')[1],
-                    });
-                    上升沿List.Add(new 上升沿());
-                }
-                ushort 起始地址 = 300;
-                ushort 点位个数 = 200;
-                while (true)
-                {
-                    var bools = pLC.ReadMCoils(起始地址, 点位个数);
-                    for (int i = 0; i < 点位个数; i++)
-                    {
-                        上升沿List[i].SetValue(bools[i]);
-                        if (上升沿List[i].GetResult())
-                        {
-                            var 报警信息 = 报警信息List.FirstOrDefault(a => a.报警地址 == i + 起始地址);
-                            addMessage($"有过{报警信息.报警地址}:{报警信息.报警内容}报警");
-                        }
-                    }
-
-                }
-            }
         }
         #endregion
         #region 数据库功能函数
@@ -375,41 +353,6 @@ namespace MonitorApp.ViewModels
             catch (Exception ex)
             {
                 Console.WriteLine("工艺质量添加数据时出错：" + ex.Message);
-            }
-            finally
-            {
-                // 关闭连接
-                if (connection.State == System.Data.ConnectionState.Open)
-                    connection.Close();
-            }
-        }
-        private void Insert_pc_data_emp(string 员工号, string 员工姓名, string 操作代码, string 操作名称)//员工上下机记录上传
-        {
-            var connection = new MySqlConnection(builder.ConnectionString);
-            try
-            {
-                // 打开连接
-                connection.Open();
-                // 执行插入数据的 SQL 语句
-                string sql = "INSERT INTO pc_data_emp (EMPNO, EMPNAME, EMPCODE, EMPDES, EMPTIME, CREATETIME) " +
-                             "VALUES (@EmpNo, @EmpName, @EmpCode, @EmpDes, @EmpTime, @CreateTime)";
-                MySqlCommand command = new MySqlCommand(sql, connection);
-
-                // 添加参数
-                command.Parameters.AddWithValue("@EmpNo", 员工号);
-                command.Parameters.AddWithValue("@EmpName", 员工姓名);
-                command.Parameters.AddWithValue("@EmpCode", 操作代码);//(上机代码：INTIME  下机代码：OUTTIME)
-                command.Parameters.AddWithValue("@EmpDes", 操作名称);//上机时间  下机时间
-                command.Parameters.AddWithValue("@EmpTime", DateTime.Now);
-                command.Parameters.AddWithValue("@CreateTime", DateTime.Now);
-
-                command.ExecuteNonQuery();
-
-                Console.WriteLine("员工上下机记录数据添加成功！");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("员工上下机记录添加数据时出错：" + ex.Message);
             }
             finally
             {
@@ -471,43 +414,4 @@ namespace MonitorApp.ViewModels
         #endregion           
     }
 }
-public class 报警信息
-{
-    public ushort 报警地址 { get; set; }
-    public string 报警内容 { get; set; }
-    public bool value { get; set; }
-}
 
-public class 上升沿
-{
-    private bool lastValue = false;
-    private bool currentValue = false;
-
-    public void SetValue(bool value)
-    {
-        lastValue = currentValue;
-        currentValue = value;
-    }
-
-    public bool GetResult()
-    {
-        return currentValue && currentValue != lastValue;
-    }
-}
-
-public class 下升沿
-{
-    private bool lastValue = false;
-    private bool currentValue = false;
-
-    public void SetValue(bool value)
-    {
-        lastValue = currentValue;
-        currentValue = value;
-    }
-
-    public bool GetResult()
-    {
-        return !currentValue && currentValue != lastValue;
-    }
-}
