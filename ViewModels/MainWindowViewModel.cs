@@ -22,8 +22,7 @@ using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using MonitorApp.Model;
-
-
+using System.Windows;
 
 namespace MonitorApp.ViewModels
 {
@@ -85,11 +84,29 @@ namespace MonitorApp.ViewModels
             set { SetProperty(ref fieldName, value); }
         }
 
-        private bool ButtonState;
+        private bool ButtonState = false;
         public bool buttonState
         {
             get { return ButtonState; }
             set { SetProperty(ref ButtonState, value); }
+        }
+        private string inOutTime = "下机";
+        public string InOutTime
+        {
+            get { return inOutTime; }
+            set { SetProperty(ref inOutTime, value); }
+        }
+        private string id;
+        public string ID
+        {
+            get { return id; }
+            set { SetProperty(ref id, value); }
+        }
+        private string name = "ZhangSan";
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
         }
         #endregion
         #region 命令绑定
@@ -105,16 +122,42 @@ namespace MonitorApp.ViewModels
         private DelegateCommand<string> testCommand;
         public DelegateCommand<string> TestCommand =>
             testCommand ?? (testCommand = new DelegateCommand<string>(ExecuteTestCommand));
-        private DelegateCommand inOutTime;
-        public DelegateCommand InOutTime =>
-            inOutTime ?? (inOutTime = new DelegateCommand(ExecuteInOutTime));
+        private DelegateCommand clickState;
+        public DelegateCommand ClickState =>
+           clickState ?? (clickState = new DelegateCommand(ExecuteClickState));
 
-        void ExecuteInOutTime()
+        void ExecuteClickState()
         {
-
+            ButtonState = !ButtonState;
+            if (ButtonState == true)
+            {
+                if (ID != null)
+                {
+                    InOutTime = "上机";
+                    Global.Insert_pc_data_emp(ID, Name, "INTIME", "上机");
+                    addMessage($"上机操作：\t{ID}\t{Name}");
+                }
+                else
+                {
+                    MessageBox.Show("请输入工号再进行上机/下机操作！！！");
+                }
+            }
+            if (ButtonState == false)
+            {
+                if (ID != null)
+                {
+                    InOutTime = "下机";
+                    Global.Insert_pc_data_emp(ID, Name, "OUTTIME", "下机");
+                    addMessage($"下机操作：\t{ID}\t{Name}");
+                }
+                else
+                {
+                    MessageBox.Show("请输入工号再进行上机/下机操作！！！");
+                }
+            }
         }
 
-        
+
 
         void ExecuteTestCommand(string obj)
         {

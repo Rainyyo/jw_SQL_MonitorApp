@@ -83,7 +83,7 @@
                                 <TextBox Text="{Binding ID}" Height="30" Margin="5"/>
                                 <TextBlock Text="姓名:"/>
                                 <TextBox Text="{Binding Name}" Height="30" Margin="5"/>
-                                <Button Command="{Binding InOutTime}" Content="上机" Height="50" Width="50" Margin="10">
+                                <Button Command="{Binding ClickState}" Content="{Binding InOutTime}" Height="50" Width="50" Margin="10">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="Yellow"/>
