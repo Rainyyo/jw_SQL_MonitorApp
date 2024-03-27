@@ -54,6 +54,7 @@
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
                     <GroupBox Header="IP配置">
                         <StackPanel>
@@ -69,17 +70,45 @@
                                 Height="20" 
                                 Text="{Binding FileName}"
                                 />
-                            <Button Command="{Binding OpenFileCommand}" Content="打开"  Margin="10" Width="60"/>
+                            <Button Command="{Binding OpenFileCommand}" Content="打开"  Margin="10" Width="60">
+                               
+                            </Button>
+                            
                         </StackPanel>
                     </GroupBox>
                     <Grid Grid.Row="2">
+                        <GroupBox Header="上机操作">
+                            <StackPanel>
+                                <TextBlock Text="工号:"/>
+                                <TextBox Text="{Binding ID}" Height="30" Margin="5"/>
+                                <TextBlock Text="姓名:"/>
+                                <TextBox Text="{Binding Name}" Height="30" Margin="5"/>
+                                <Button Command="{Binding InOutTime}" Content="上机" Height="50" Width="50" Margin="10">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="Yellow"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ButtonState}" Value="true">
+                                                    <Setter Property="Background" Value="ForestGreen"></Setter>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ButtonState}" Value="false">
+                                                    <Setter Property="Background" Value="Yellow"></Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+                    <Grid Grid.Row="3">
                         <GroupBox Header="测试">
                             <StackPanel Margin="5">
-                                <Button Command="{Binding TestCommand}" CommandParameter="查询数据库" Height=" 20" Width="100" Content="查询数据库" Margin="5"/>
-                                <Button Command="{Binding TestCommand}" CommandParameter="新建数据库" Height=" 20" Width="100" Content="新建数据库" Margin="5"/>
-                                <Button Command="{Binding TestCommand}" CommandParameter="数据库建表" Height=" 20" Width="100" Content="数据库建表" Margin="5"/>
-                                <Button Command="{Binding TestCommand}" CommandParameter="写数据报警描述数据" Height=" 20" Width="100" Content="写数据报警描述数据" Margin="5"/>
-                                <Button Command="{Binding TestCommand}" CommandParameter="写工艺质量数据" Height=" 20" Width="100" Content="写工艺质量数据" Margin="5"/>
+                               
+                                <Button Command="{Binding TestCommand}" CommandParameter="写数据报警描述数据" Height=" 20" Width="120" Content="写数据报警描述数据" Margin="5"/>
+                                <Button Command="{Binding TestCommand}" CommandParameter="新建数据库" Height=" 20" Width="120" Content="打印数据库表信息" Margin="5"/>
+                                <Button Command="{Binding TestCommand}" CommandParameter="数据库建表" Height=" 20" Width="120" Content="" Margin="5"/>
+                                <Button Command="{Binding TestCommand}" CommandParameter="写工艺质量数据" Height=" 20" Width="120" Content="" Margin="5"/>
                             </StackPanel>
                            
                         </GroupBox>
