@@ -13,15 +13,31 @@
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterScreen" />
             <Setter Property="ResizeMode" Value="NoResize" />
             <Setter Property="Width" Value="400" />
-            <Setter Property="Height" Value="250" />
+            <Setter Property="Height" Value="350" />
         </Style>
     </prism:Dialog.WindowStyle>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <GroupBox Header="PLC报警参数配置">
+        <GroupBox Header="PLC地址">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="IP:"/>
+                <TextBox Text="{Binding IP}"
+                         Width="150"
+                         Margin="5">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="LostFocus">
+                            <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="IP" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TextBox>
+            </StackPanel>
+        </GroupBox>
+                  
+        <GroupBox Header="PLC报警参数配置" Grid.Row="1">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="起始地址:"/>
@@ -53,7 +69,7 @@
 
             </StackPanel>
         </GroupBox>
-        <GroupBox Header="#" Grid.Row="1">
+        <GroupBox Header="#" Grid.Row="2">
             <StackPanel>
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
@@ -92,7 +108,7 @@
                             </i:Interaction.Triggers>
                         </TextBox>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
+                    <!--<StackPanel Orientation="Horizontal">
                         <Label Content="急停"/>
                         <TextBox Height="15" Width="40" Margin="5" Text="{Binding Stop}">
                             <i:Interaction.Triggers>
@@ -101,7 +117,7 @@
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                         </TextBox>
-                    </StackPanel>
+                    </StackPanel>-->
                 </StackPanel>
             </StackPanel>
         </GroupBox>

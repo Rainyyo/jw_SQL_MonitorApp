@@ -64,10 +64,9 @@
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
-                    <GroupBox Header="IP配置" FontSize="20">
+                    <GroupBox Header="名称" FontSize="20">
                         <StackPanel>
-                            <TextBlock Text="ip地址" FontSize="20"/>
-                            <TextBox Width="200" Height="30" Text="{Binding IP}" IsReadOnly="True" Margin="5"/>
+                            <TextBlock Text="{Binding AppName}" FontSize="30" Foreground="LightBlue"/>
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Grid.Row="1" Header="报警文件信息" FontSize="20">
@@ -98,7 +97,7 @@
                                             <Setter Property="Background" Value="Yellow"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding ButtonState}" Value="true">
-                                                    <Setter Property="Background" Value="ForestGreen"></Setter>
+                                                    <Setter Property="Background" Value="LawnGreen"></Setter>
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding ButtonState}" Value="false">
                                                     <Setter Property="Background" Value="Yellow"></Setter>
@@ -111,13 +110,13 @@
                         </GroupBox>
                     </Grid>
                     <Grid Grid.Row="3">
-                        <GroupBox Header="测试" Visibility="Collapsed">
+                        <GroupBox Header="测试">
                             <StackPanel Margin="5">
-
-                                <Button Command="{Binding TestCommand}" CommandParameter="写数据报警描述数据" Height=" 20" Width="120" Content="写数据报警描述数据" Margin="5"/>
                                 <Button Command="{Binding TestCommand}" CommandParameter="新建数据库" Height=" 20" Width="120" Content="打印数据库表信息" Margin="5"/>
+                                <Button Command="{Binding TestCommand}" CommandParameter="写数据报警描述数据" Height=" 20" Width="120" Content="写数据报警描述数据" Margin="5"/>
+                              
                                 <Button Command="{Binding TestCommand}" CommandParameter="数据库建表" Height=" 20" Width="120" Content="" Margin="5"/>
-                                <Button Command="{Binding TestCommand}" CommandParameter="写工艺质量数据" Height=" 20" Width="120" Content="" Margin="5"/>
+                                <Button Command="{Binding TestCommand}" CommandParameter="test"  Height=" 20" Width="120" Content="测试" Margin="5"/>
                             </StackPanel>
 
                         </GroupBox>

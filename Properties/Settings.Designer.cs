@@ -178,5 +178,17 @@ namespace MonitorApp.Properties {
                 this["报警点位个数"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("CCS_热铆机")]
+        public string AppName {
+            get {
+                return ((string)(this["AppName"]));
+            }
+            set {
+                this["AppName"] = value;
+            }
+        }
     }
 }

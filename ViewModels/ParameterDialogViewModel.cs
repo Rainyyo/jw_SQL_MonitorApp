@@ -13,6 +13,12 @@ namespace MonitorApp.ViewModels
     public class ParameterDialogViewModel : DialogViewModel
     {
         #region 属性
+        private string ip;
+        public string IP
+        {
+            get { return ip; }
+            set { SetProperty(ref ip, value); }
+        }
         private int startAddr;
         public int StartAddr
         {
@@ -57,6 +63,7 @@ namespace MonitorApp.ViewModels
             get { return stop; }
             set { SetProperty(ref stop, value); }
         }
+        
         #endregion
         #region 方法
         private DelegateCommand loadFile;
@@ -89,6 +96,10 @@ namespace MonitorApp.ViewModels
             {
                 switch (str)
                 {
+                    case "IP":
+                        Settings.Default.PLC= IP;
+                        break;
+
                     case "起始地址":
                         Settings.Default.报警起始地址 = StartAddr;
                         break;
@@ -118,6 +129,8 @@ namespace MonitorApp.ViewModels
         public ParameterDialogViewModel(IContainerProvider containerProvider) : base(containerProvider)
         {
             Title = "参数设置";
+            IP = Settings.Default.PLC;
+
             StartAddr = Settings.Default.报警起始地址;
             CountAddr = Settings.Default.报警点位个数;
             FilePath = Settings.Default.Filer;

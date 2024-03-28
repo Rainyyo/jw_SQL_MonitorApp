@@ -41,5 +41,8 @@
     <Setting Name="报警点位个数" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">200</Value>
     </Setting>
+    <Setting Name="AppName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">CCS_热铆机</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

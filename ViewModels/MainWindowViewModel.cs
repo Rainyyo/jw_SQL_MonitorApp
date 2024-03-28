@@ -50,19 +50,18 @@ namespace MonitorApp.ViewModels
             set { SetProperty(ref _title, value); }
         }
         public string Version { get; set; } = "1.0.0";
-
+        private string appName;
+        public string AppName
+        {
+            get { return appName; }
+            set { SetProperty(ref appName, value); }
+        }
         //日志打印
         private string messageStr = string.Empty;
         public string MessageStr
         {
             get { return messageStr; }
             set { SetProperty(ref messageStr, value); }
-        }
-        private string ip;
-        public string IP
-        {
-            get { return ip; }
-            set { SetProperty(ref ip, value); }
         }
         private bool pLCState;
         public bool PLCState
@@ -242,8 +241,8 @@ namespace MonitorApp.ViewModels
                         addMessage(res);
                     }
                     break;
-                case "写工艺质量数据":
-
+                case "test":
+                    var a = pLC.ReadDRegisters(1, 1);
                     break;
 
 
@@ -270,7 +269,6 @@ namespace MonitorApp.ViewModels
         {
             FileName = Properties.Settings.Default.Filer;
             addMessage("软件打开！");
-            IP = Properties.Settings.Default.PLC;
             Task.Run(() =>
             {
                 var r = pLC.Connect(Properties.Settings.Default.PLC);
@@ -284,7 +282,7 @@ namespace MonitorApp.ViewModels
                 {
                     //读PLC
                     addMessage("PLC连接成功!");
-                    Task.Run(() => PLCReadAction());
+                    Task.Run(() => PLC_ReadWarningAction());
                 }
             });
             Task.Run(() =>
@@ -310,7 +308,7 @@ namespace MonitorApp.ViewModels
 
                 catch (Exception ex)
                 {
-                    addMessage("连接到数据库时出错：" + ex.Message);
+                    addMessage("连接到数据库时出错！");
                 }
             });
         }
@@ -327,6 +325,7 @@ namespace MonitorApp.ViewModels
         {
             pLC = containerProvider.Resolve<IPLCService>("PLC");//初始化
             _dialogService = containerProvider.Resolve<IDialogService>();
+            AppName=Settings.Default.AppName;
             MySQL_ConnectionMsg();
             Global.Ini();
             Add_SQL_data_alarm();
@@ -348,7 +347,7 @@ namespace MonitorApp.ViewModels
             }
             MessageStr += DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + " " + str;
         }
-        private void PLCReadAction()
+        private void PLC_ReadWarningAction()
         {
             Task.Run(() => {
                 while (true)
@@ -370,7 +369,7 @@ namespace MonitorApp.ViewModels
                                     {
                                         if (WarringAddr[i] == true)
                                         {
-                                            addMessage(i + 起始地址 + "|报警触发");
+                                            addMessage("M"+i + 起始地址 + "|报警触发");
                                             foreach (var item in WarningFileMsg)
                                             {
                                                 string plcAddr = item.Split("\t")[0].Replace("M", "");
@@ -406,7 +405,7 @@ namespace MonitorApp.ViewModels
                                                     }); ;
                                                 }
                                             }
-                                            addMessage(i + 起始地址 + "|报警解除");
+                                            addMessage("M" + i + 起始地址 + "|报警解除");
                                         }
                                     }
                                 }
@@ -415,7 +414,7 @@ namespace MonitorApp.ViewModels
                         }
                         catch (Exception ex)
                         {
-                            addMessage(ex.ToString());
+                            addMessage("PLC读报警文件失败！");
                         }
                     }
                     Thread.Sleep(100);
@@ -438,12 +437,26 @@ namespace MonitorApp.ViewModels
                             {
                                 addMessage("报警信息写入数据库成功！");
                             }
-                            else { addMessage(res); }
+                            else { addMessage("报警信息写入数据库失败！"); }
                         }
                     }
                 }
             });
 
+        }
+        private void Monitor_PLC_Steta()
+        {
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    if (pLC.Connected)
+                    {
+                        var RuningState = pLC.ReadDRegisters(Settings.Default.生产,1);
+
+                    }
+                }
+            });
         }
         #endregion
         #region 数据库功能函数
