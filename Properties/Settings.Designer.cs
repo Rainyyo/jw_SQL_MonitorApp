@@ -106,5 +106,53 @@ namespace MonitorApp.Properties {
                 this["MySQL_Database"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2530")]
+        public int 待料 {
+            get {
+                return ((int)(this["待料"]));
+            }
+            set {
+                this["待料"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2530")]
+        public int 生产 {
+            get {
+                return ((int)(this["生产"]));
+            }
+            set {
+                this["生产"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2531")]
+        public int 暂停 {
+            get {
+                return ((int)(this["暂停"]));
+            }
+            set {
+                this["暂停"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("240")]
+        public int 急停 {
+            get {
+                return ((int)(this["急停"]));
+            }
+            set {
+                this["急停"] = value;
+            }
+        }
     }
 }

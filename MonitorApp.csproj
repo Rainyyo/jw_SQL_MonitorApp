@@ -8,6 +8,7 @@
     <None Remove="Views\pre_icon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="BingLibraryLite" Version="2.2.4-pre" />
     <PackageReference Include="EPPlus" Version="7.0.10" />
     <PackageReference Include="MySql.Data" Version="8.3.0" />
     <PackageReference Include="NLog" Version="5.2.8" />

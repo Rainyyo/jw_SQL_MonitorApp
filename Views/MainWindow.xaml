@@ -17,10 +17,17 @@
     <Grid>
         <!--<ContentControl prism:RegionManager.RegionName="ContentRegion" />-->
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <Grid>
+        <Menu VerticalAlignment="Center">
+            <MenuItem
+        Command="{Binding MenuCommand}"
+        CommandParameter="参数"
+        Header="参数" />
+        </Menu>
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition Width="auto"/>
@@ -69,6 +76,7 @@
                                 Width="200"
                                 Height="20" 
                                 Text="{Binding FileName}"
+                                IsReadOnly="True"
                                 />
                             <Button Command="{Binding OpenFileCommand}" Content="打开"  Margin="10" Width="60">
                                
@@ -118,7 +126,7 @@
             </Grid>
         </Grid>
         
-        <StatusBarItem Grid.Row="1">
+        <StatusBarItem Grid.Row="2">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="PLC"  Margin="5"/>
                 <Ellipse  Width="13" Height="13">

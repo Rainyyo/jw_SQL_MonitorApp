@@ -23,5 +23,17 @@
     <Setting Name="MySQL_Database" Type="System.String" Scope="User">
       <Value Profile="(Default)">jw-eap</Value>
     </Setting>
+    <Setting Name="待料" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2530</Value>
+    </Setting>
+    <Setting Name="生产" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2530</Value>
+    </Setting>
+    <Setting Name="暂停" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2531</Value>
+    </Setting>
+    <Setting Name="急停" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">240</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

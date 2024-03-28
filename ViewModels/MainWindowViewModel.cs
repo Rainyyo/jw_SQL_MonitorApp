@@ -24,6 +24,7 @@ using System.Linq;
 using MonitorApp.Model;
 using System.Windows;
 using OfficeOpenXml;
+using System.Collections.Concurrent;
 
 namespace MonitorApp.ViewModels
 {
@@ -31,9 +32,15 @@ namespace MonitorApp.ViewModels
     {
         #region 变量
         private readonly IPLCService pLC;
+        private readonly IDialogService _dialogService;
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        private CancellationTokenSource source1;
         MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder();
+        private bool isParameterDialogShow = false;
+        int 起始地址;
+        int 地址个数;
+        private ConcurrentQueue<SignalMsg> WarningQueue = new();
+        static bool[] mPreWarning1 = null;
+
         #endregion
         #region 属性
         private string _title = "MonitorApp";
@@ -82,11 +89,11 @@ namespace MonitorApp.ViewModels
             set { SetProperty(ref fieldName, value); }
         }
 
-        private bool ButtonState = false;
-        public bool buttonState
+        private bool buttonState = false;
+        public bool ButtonState
         {
-            get { return ButtonState; }
-            set { SetProperty(ref ButtonState, value); }
+            get { return buttonState; }
+            set { SetProperty(ref buttonState, value); }
         }
         private string inOutTime = "下机";
         public string InOutTime
@@ -114,6 +121,9 @@ namespace MonitorApp.ViewModels
         private DelegateCommand appClosedEventCommand;
         public DelegateCommand AppClosedEventCommand =>
             appClosedEventCommand ?? (appClosedEventCommand = new DelegateCommand(ExecuteAppClosedEventCommand));
+        private DelegateCommand<object> _menuCommand;
+        public DelegateCommand<object> MenuCommand =>
+            _menuCommand ?? (_menuCommand = new DelegateCommand<object>(ExecuteMenuCommand));
         private DelegateCommand openFileCommand;
         public DelegateCommand OpenFileCommand =>
             openFileCommand ?? (openFileCommand = new DelegateCommand(ExecuteOpenFileCommand));
@@ -123,53 +133,82 @@ namespace MonitorApp.ViewModels
         private DelegateCommand clickState;
         public DelegateCommand ClickState =>
            clickState ?? (clickState = new DelegateCommand(ExecuteClickState));
-
+        void ExecuteMenuCommand(object obj)
+        {
+            switch (obj.ToString())
+            {
+                case "参数":
+                    if (!isParameterDialogShow)
+                    {
+                        isParameterDialogShow = true;
+                        DialogParameters param = new DialogParameters();
+                        _dialogService.Show("ParameterDialog", param, arg =>
+                        {
+                            isParameterDialogShow = false;
+                            IsWindowFocused = !IsWindowFocused;
+                        });
+                    }
+                    break;
+            }
+        }
         void ExecuteClickState()
         {
+            if (ID==null)
+            {
+                return;
+            }
             ButtonState = !ButtonState;
             if (ButtonState == true)
             {
-                if (ID != null)
+                Task.Run(() =>
                 {
-                    InOutTime = "上机";
-                     var res= Global.Insert_pc_data_emp(ID, Name, "INTIME", "上机");
-                    if (res=="ok")
+                    if (ID != null)
                     {
-                        addMessage($"上机操作：\t{ID}\t{Name}");
+                        InOutTime = "上机";
+                        var res = Global.Insert_pc_data_emp(ID, Name, "INTIME", "上机");
+                        if (res == "ok")
+                        {
+                            addMessage($"上机操作：\t{ID}\t{Name}");
+                        }
+                        else
+                        {
+                            addMessage("数据库错误:" + res);
+                        }
+
                     }
                     else
                     {
-                        addMessage("数据库错误:" + res);
+                        MessageBox.Show("请输入工号再进行上机/下机操作！！！");
                     }
-                   
-                }
-                else
-                {
-                    MessageBox.Show("请输入工号再进行上机/下机操作！！！");
-                }
+                });
+
             }
             if (ButtonState == false)
             {
-                if (ID != null)
+                Task.Run(() =>
                 {
-                    InOutTime = "下机";
-                    var res = Global.Insert_pc_data_emp(ID, Name, "OUTTIME", "下机");
-                    if (res == "ok")
+                    if (ID != null)
                     {
-                        addMessage($"下机操作：\t{ID}\t{Name}");
+                        InOutTime = "下机";
+                        var res = Global.Insert_pc_data_emp(ID, Name, "OUTTIME", "下机");
+                        if (res == "ok")
+                        {
+                            ID =null;
+                            addMessage($"下机操作：\t{ID}\t{Name}");
+                        }
+                        else
+                        {
+                            addMessage("数据库错误:" + res);
+                        }
                     }
                     else
                     {
-                        addMessage("数据库错误:" + res);
+                        MessageBox.Show("请输入工号再进行上机/下机操作！！！");
                     }
-                }
-                else
-                {
-                    MessageBox.Show("请输入工号再进行上机/下机操作！！！");
-                }
+                });
             }
         }
-        void ExecuteTestCommand(string obj)
+        async void ExecuteTestCommand(string obj)
         {
             //初始化连接实例
             var connection = new MySqlConnection(builder.ConnectionString);
@@ -200,7 +239,15 @@ namespace MonitorApp.ViewModels
 
                     break;
                 case "写数据报警描述数据":
-                    Global.Insert_pc_data_alarm("3", "3", "3");
+                    var res = await Global.Insert_pc_data_alarm("3213", "wangring", "1");
+                    if (res == "ok")
+                    {
+                        addMessage($"警描述数据写入成功");
+                    }
+                    else
+                    {
+                        addMessage(res);
+                    }
                     break;
                 case "写工艺质量数据":
 
@@ -244,9 +291,7 @@ namespace MonitorApp.ViewModels
                 {
                     //读PLC
                     addMessage("PLC连接成功!");
-                    source1 = new CancellationTokenSource();
-                    CancellationToken token = source1.Token;
-                    Task.Run(() => PLCReadAction(token), token);
+                    Task.Run(() => PLCReadAction());
                 }
             });
             Task.Run(() =>
@@ -279,6 +324,7 @@ namespace MonitorApp.ViewModels
         void ExecuteAppClosedEventCommand()
         {
             var res = Global.Insert_pc_data_emp(ID, Name, "OUTTIME", "下机");
+            Settings.Default.Save();
             addMessage("软件关闭!");
             pLC.Close();
         }
@@ -287,9 +333,11 @@ namespace MonitorApp.ViewModels
         public MainWindowViewModel(IContainerProvider containerProvider)
         {
             pLC = containerProvider.Resolve<IPLCService>("PLC");//初始化
+            _dialogService = containerProvider.Resolve<IDialogService>();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             MySQL_ConnectionMsg();
             Global.Ini();
+            Add_SQL();
         }
         #endregion
         #region 功能函数
@@ -308,8 +356,100 @@ namespace MonitorApp.ViewModels
             }
             MessageStr += DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + " " + str;
         }
-        private void PLCReadAction(CancellationToken token)
+        private async void PLCReadAction()
         {
+            while (true)
+            {
+                if (pLC.Connected)
+                {
+                    try
+                    {
+                        起始地址 = 300;
+                        地址个数 = 200;
+                        //读报警地址
+                        var WarringAddr = pLC.ReadMCoils(起始地址, 地址个数);
+                        var WarningFileMsg = File.ReadAllLines(FileName, Encoding.UTF8);
+                        if (mPreWarning1 != null)
+                        {
+                            for (int i = 0; i < WarringAddr.Length; i++)
+                            {
+                                if (WarringAddr[i] != mPreWarning1[i])
+                                {
+                                    if (WarringAddr[i] == true)
+                                    {
+                                        addMessage(i + 300 + "|报警触发");
+                                        foreach (var item in WarningFileMsg)
+                                        {
+                                            string plcAddr = item.Split("\t")[0].Replace("M", "");
+                                            string errorMsg = item.Split("\t")[1];
+                                            if ((i + 起始地址).ToString() == plcAddr && errorMsg != "")
+                                            {
+                                                addMessage(errorMsg);
+                                                WarningQueue.Enqueue(new SignalMsg()
+                                                {
+
+                                                    WarningAddr = plcAddr,
+                                                    WarningMsg = errorMsg,
+                                                    WarningTrigger = 1
+                                                }); ;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                        foreach (var item in WarningFileMsg)
+                                        {
+                                            string plcAddr = item.Split("\t")[0].Replace("M", "");
+                                            string errorMsg = item.Split("\t")[1];
+                                            if ((i + 起始地址).ToString() == plcAddr && errorMsg != "")
+                                            {
+                                                addMessage(errorMsg);
+                                                WarningQueue.Enqueue(new SignalMsg()
+                                                {
+
+                                                    WarningAddr = plcAddr,
+                                                    WarningMsg = errorMsg,
+                                                    WarningTrigger = 0
+                                                }); ;
+                                            }
+                                        }
+                                        addMessage(i + 300 + "|报警解除");
+
+                                    }
+                                }
+                            }
+                        }
+                        mPreWarning1 = WarringAddr;
+                    }
+                    catch (Exception ex)
+                    {
+                        addMessage(ex.ToString());
+                    }
+                }
+                Thread.Sleep(100);
+            }
+        }
+        private  void Add_SQL()
+        {
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    if (WarningQueue.Count > 0)
+                    {
+                        if (WarningQueue.TryDequeue(out var msg))
+                        {
+                            var res = await Global.Insert_pc_data_alarm(msg.WarningAddr, msg.WarningMsg, msg.WarningTrigger.ToString());
+                            if (res == "ok")
+                            {
+                                addMessage("报警信息写入MySQL成功！");
+                            }
+                            else { addMessage(res); }
+                        }
+                    }
+                }
+            });
 
         }
         #endregion
@@ -323,80 +463,7 @@ namespace MonitorApp.ViewModels
             builder.Password = Settings.Default.MySQL_Password;
             builder.Database = Settings.Default.MySQL_Database;
         }
-        private void Insert_pc_data_craft(string 批次号, string 版号, string 项目代码, string 项目描述, string 单位, string 采集值, string isok)//工艺质量
-        {
-            var connection = new MySqlConnection(builder.ConnectionString);
-            try
-            {
-                // 打开连接
-                connection.Open();
-                // 执行插入数据的 SQL 语句
-                string sql = "INSERT INTO pc_data_craft (CONTAINER, PNLIDORSETID, ITEMCODE, ITEMDES, UOM, ITEMVALUE, ISOK, GROUPNUM, CREATETIME) " +
-                             "VALUES (@Container, @PnlIdOrSetId, @ItemCode, @ItemDes, @Uom, @ItemValue, @IsOk, @GroupNum, @CreateTime)";
-                MySqlCommand command = new MySqlCommand(sql, connection);
 
-                // 添加参数
-                command.Parameters.AddWithValue("@Container", 批次号);
-                command.Parameters.AddWithValue("@PnlIdOrSetId", 版号);
-                command.Parameters.AddWithValue("@ItemCode", 项目代码);
-                command.Parameters.AddWithValue("@ItemDes", 项目描述);
-                command.Parameters.AddWithValue("@Uom", 单位);
-                command.Parameters.AddWithValue("@ItemValue", 采集值);
-                command.Parameters.AddWithValue("@IsOk", isok);
-                command.Parameters.AddWithValue("@GroupNum", DateTime.Now.ToString("yyyyMMddhhmmssff"));
-                command.Parameters.AddWithValue("@CreateTime", DateTime.Now);
-
-                command.ExecuteNonQuery();
-
-                Console.WriteLine("工艺质量添加成功！");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("工艺质量添加数据时出错：" + ex.Message);
-            }
-            finally
-            {
-                // 关闭连接
-                if (connection.State == System.Data.ConnectionState.Open)
-                    connection.Close();
-            }
-        }
-        private void Insert_pc_signal_status(string 信号代码, string 信号描述, string 信号值)//设备实时信号
-        {
-            // 创建 MySqlConnection 对象
-            MySqlConnection connection = new MySqlConnection(builder.ConnectionString);
-
-            try
-            {
-                // 打开连接
-                connection.Open();
-
-                // 执行插入数据的 SQL 语句
-                string sql = "INSERT INTO pc_signal_status (SIGNALCODE, SIGNALDES, SIGNALVALUE, CREATETIME) " +
-                             "VALUES (@SignalCode, @SignalDes, @SignalValue, @CreateTime)";
-                MySqlCommand command = new MySqlCommand(sql, connection);
-
-                // 添加参数
-                command.Parameters.AddWithValue("@SignalCode", 信号代码);
-                command.Parameters.AddWithValue("@SignalDes", 信号描述);
-                command.Parameters.AddWithValue("@SignalValue", 信号值);
-                command.Parameters.AddWithValue("@CreateTime", DateTime.Now);
-
-                command.ExecuteNonQuery();
-
-                Console.WriteLine("设备实时信号数据添加成功！");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("设备实时信号添加数据时出错：" + ex.Message);
-            }
-            finally
-            {
-                // 关闭连接
-                if (connection.State == System.Data.ConnectionState.Open)
-                    connection.Close();
-            }
-        }
         static bool CheckIfDatabaseExists(MySqlConnection connection, string databaseName)
         {
             string sql = $"SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{databaseName}'";
@@ -413,5 +480,13 @@ namespace MonitorApp.ViewModels
         }
         #endregion           
     }
+    public class SignalMsg
+    {
+        public string WarningAddr { get; set; }
+        public string WarningMsg { get; set; }
+        public int WarningTrigger { get; set; }
+
+    }
 }
+
 
