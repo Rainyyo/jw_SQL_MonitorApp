@@ -39,7 +39,7 @@ namespace MonitorApp.ViewModels
         int 起始地址;
         int 地址个数;
         private ConcurrentQueue<SignalMsg> WarningQueue = new();
-        static bool[] mPreWarning1 = null;
+        bool[] mPreWarning1 = null;
 
         #endregion
         #region 属性
@@ -155,6 +155,7 @@ namespace MonitorApp.ViewModels
         {
             if (ID==null)
             {
+                MessageBox.Show("请输入工号再进行上机/下机操作！！！");
                 return;
             }
             ButtonState = !ButtonState;
@@ -176,10 +177,6 @@ namespace MonitorApp.ViewModels
                         }
 
                     }
-                    else
-                    {
-                        MessageBox.Show("请输入工号再进行上机/下机操作！！！");
-                    }
                 });
 
             }
@@ -193,17 +190,13 @@ namespace MonitorApp.ViewModels
                         var res = Global.Insert_pc_data_emp(ID, Name, "OUTTIME", "下机");
                         if (res == "ok")
                         {
-                            ID =null;
                             addMessage($"下机操作：\t{ID}\t{Name}");
+                            ID = null;
                         }
                         else
                         {
                             addMessage("数据库错误:" + res);
                         }
-                    }
-                    else
-                    {
-                        MessageBox.Show("请输入工号再进行上机/下机操作！！！");
                     }
                 });
             }
@@ -326,7 +319,7 @@ namespace MonitorApp.ViewModels
             var res = Global.Insert_pc_data_emp(ID, Name, "OUTTIME", "下机");
             Settings.Default.Save();
             addMessage("软件关闭!");
-            pLC.Close();
+            //pLC.Close();
         }
         #endregion
         #region 构造函数
@@ -334,10 +327,9 @@ namespace MonitorApp.ViewModels
         {
             pLC = containerProvider.Resolve<IPLCService>("PLC");//初始化
             _dialogService = containerProvider.Resolve<IDialogService>();
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             MySQL_ConnectionMsg();
             Global.Ini();
-            Add_SQL();
+            Add_SQL_data_alarm();
         }
         #endregion
         #region 功能函数
@@ -356,81 +348,82 @@ namespace MonitorApp.ViewModels
             }
             MessageStr += DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + " " + str;
         }
-        private async void PLCReadAction()
+        private void PLCReadAction()
         {
-            while (true)
-            {
-                if (pLC.Connected)
+            Task.Run(() => {
+                while (true)
                 {
-                    try
+                    if (pLC.Connected)
                     {
-                        起始地址 = 300;
-                        地址个数 = 200;
-                        //读报警地址
-                        var WarringAddr = pLC.ReadMCoils(起始地址, 地址个数);
-                        var WarningFileMsg = File.ReadAllLines(FileName, Encoding.UTF8);
-                        if (mPreWarning1 != null)
+                        try
                         {
-                            for (int i = 0; i < WarringAddr.Length; i++)
+                            起始地址 = Settings.Default.报警起始地址;
+                            地址个数 = Settings.Default.报警点位个数;
+                            //读报警地址
+                            var WarringAddr = pLC.ReadMCoils(起始地址, 地址个数);
+                            var WarningFileMsg = File.ReadAllLines(FileName, Encoding.UTF8);
+                            if (mPreWarning1 != null)
                             {
-                                if (WarringAddr[i] != mPreWarning1[i])
+                                for (int i = 0; i < WarringAddr.Length; i++)
                                 {
-                                    if (WarringAddr[i] == true)
+                                    if (WarringAddr[i] != mPreWarning1[i])
                                     {
-                                        addMessage(i + 300 + "|报警触发");
-                                        foreach (var item in WarningFileMsg)
+                                        if (WarringAddr[i] == true)
                                         {
-                                            string plcAddr = item.Split("\t")[0].Replace("M", "");
-                                            string errorMsg = item.Split("\t")[1];
-                                            if ((i + 起始地址).ToString() == plcAddr && errorMsg != "")
+                                            addMessage(i + 起始地址 + "|报警触发");
+                                            foreach (var item in WarningFileMsg)
                                             {
-                                                addMessage(errorMsg);
-                                                WarningQueue.Enqueue(new SignalMsg()
+                                                string plcAddr = item.Split("\t")[0].Replace("M", "");
+                                                string errorMsg = item.Split("\t")[1];
+                                                if ((i + 起始地址).ToString() == plcAddr && errorMsg != "")
                                                 {
-
-                                                    WarningAddr = plcAddr,
-                                                    WarningMsg = errorMsg,
-                                                    WarningTrigger = 1
-                                                }); ;
+                                                    addMessage(errorMsg);
+                                                    WarningQueue.Enqueue(new SignalMsg()
+                                                    {
+                                                        WarningAddr = plcAddr,
+                                                        WarningMsg = errorMsg,
+                                                        WarningTrigger = 1
+                                                    });
+                                                }
                                             }
                                         }
-                                    }
-                                    else
-                                    {
-
-                                        foreach (var item in WarningFileMsg)
+                                        else
                                         {
-                                            string plcAddr = item.Split("\t")[0].Replace("M", "");
-                                            string errorMsg = item.Split("\t")[1];
-                                            if ((i + 起始地址).ToString() == plcAddr && errorMsg != "")
+
+                                            foreach (var item in WarningFileMsg)
                                             {
-                                                addMessage(errorMsg);
-                                                WarningQueue.Enqueue(new SignalMsg()
+                                                string plcAddr = item.Split("\t")[0].Replace("M", "");
+                                                string errorMsg = item.Split("\t")[1];
+                                                if ((i + 起始地址).ToString() == plcAddr && errorMsg != "")
                                                 {
+                                                    addMessage(errorMsg);
+                                                    WarningQueue.Enqueue(new SignalMsg()
+                                                    {
 
-                                                    WarningAddr = plcAddr,
-                                                    WarningMsg = errorMsg,
-                                                    WarningTrigger = 0
-                                                }); ;
+                                                        WarningAddr = plcAddr,
+                                                        WarningMsg = errorMsg,
+                                                        WarningTrigger = 0
+                                                    }); ;
+                                                }
                                             }
+                                            addMessage(i + 起始地址 + "|报警解除");
                                         }
-                                        addMessage(i + 300 + "|报警解除");
-
                                     }
                                 }
                             }
+                            mPreWarning1 = WarringAddr;
                         }
-                        mPreWarning1 = WarringAddr;
+                        catch (Exception ex)
+                        {
+                            addMessage(ex.ToString());
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        addMessage(ex.ToString());
-                    }
+                    Thread.Sleep(100);
                 }
-                Thread.Sleep(100);
-            }
+            });
+          
         }
-        private  void Add_SQL()
+        private  void Add_SQL_data_alarm()
         {
             Task.Run(async () =>
             {
@@ -443,7 +436,7 @@ namespace MonitorApp.ViewModels
                             var res = await Global.Insert_pc_data_alarm(msg.WarningAddr, msg.WarningMsg, msg.WarningTrigger.ToString());
                             if (res == "ok")
                             {
-                                addMessage("报警信息写入MySQL成功！");
+                                addMessage("报警信息写入数据库成功！");
                             }
                             else { addMessage(res); }
                         }

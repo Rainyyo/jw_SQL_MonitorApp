@@ -35,5 +35,11 @@
     <Setting Name="急停" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">240</Value>
     </Setting>
+    <Setting Name="报警起始地址" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
+    <Setting Name="报警点位个数" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">200</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -13,7 +13,7 @@
             <i:InvokeCommandAction Command="{Binding AppClosedEventCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    
+
     <Grid>
         <!--<ContentControl prism:RegionManager.RegionName="ContentRegion" />-->
         <Grid.RowDefinitions>
@@ -29,10 +29,11 @@
         </Menu>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="13*"/>
+                <ColumnDefinition Width="401*"/>
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
-            <Grid>
+            <Grid Grid.ColumnSpan="2">
                 <GroupBox Header="日志信息">
                     <TextBox
         x:Name="MsgTextBox"
@@ -54,8 +55,8 @@
         VerticalScrollBarVisibility="Auto" />
                 </GroupBox>
             </Grid>
-            
-            <Grid Grid.Column="1">
+
+            <Grid Grid.Column="2">
                 <Grid Grid.Column="0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
@@ -63,35 +64,35 @@
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
-                    <GroupBox Header="IP配置">
+                    <GroupBox Header="IP配置" FontSize="20">
                         <StackPanel>
-                            <TextBlock Text="ip地址"/>
-                            <TextBox Width="200" Height="20" Text="{Binding IP}" IsReadOnly="True"/>
+                            <TextBlock Text="ip地址" FontSize="20"/>
+                            <TextBox Width="200" Height="30" Text="{Binding IP}" IsReadOnly="True" Margin="5"/>
                         </StackPanel>
                     </GroupBox>
-                    <GroupBox Grid.Row="1" Header="报警文件配置">
+                    <GroupBox Grid.Row="1" Header="报警文件信息" FontSize="20">
                         <StackPanel Margin="5">
-                            
                             <TextBox
                                 Width="200"
-                                Height="20" 
+                                Height="30" 
                                 Text="{Binding FileName}"
                                 IsReadOnly="True"
+                                FontSize="20"
                                 />
-                            <Button Command="{Binding OpenFileCommand}" Content="打开"  Margin="10" Width="60">
-                               
+                            <Button Command="{Binding OpenFileCommand}" Content="打开"  Margin="10" Width="60" Visibility="Collapsed">
+
                             </Button>
-                            
+
                         </StackPanel>
                     </GroupBox>
                     <Grid Grid.Row="2">
-                        <GroupBox Header="上机操作">
+                        <GroupBox Header="上机操作" FontSize="20">
                             <StackPanel>
-                                <TextBlock Text="工号:"/>
+                                <TextBlock Text="工号:" FontSize="20" Margin="6"/>
                                 <TextBox Text="{Binding ID}" Height="30" Margin="5"/>
                                 <TextBlock Text="姓名:"/>
                                 <TextBox Text="{Binding Name}" Height="30" Margin="5"/>
-                                <Button Command="{Binding ClickState}" Content="{Binding InOutTime}" Height="50" Width="50" Margin="10">
+                                <Button Command="{Binding ClickState}" Content="{Binding InOutTime}" Height="80" Width="80" Margin="10" FontSize="20" BorderThickness="3">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="Yellow"/>
@@ -110,22 +111,21 @@
                         </GroupBox>
                     </Grid>
                     <Grid Grid.Row="3">
-                        <GroupBox Header="测试">
+                        <GroupBox Header="测试" Visibility="Collapsed">
                             <StackPanel Margin="5">
-                               
+
                                 <Button Command="{Binding TestCommand}" CommandParameter="写数据报警描述数据" Height=" 20" Width="120" Content="写数据报警描述数据" Margin="5"/>
                                 <Button Command="{Binding TestCommand}" CommandParameter="新建数据库" Height=" 20" Width="120" Content="打印数据库表信息" Margin="5"/>
                                 <Button Command="{Binding TestCommand}" CommandParameter="数据库建表" Height=" 20" Width="120" Content="" Margin="5"/>
                                 <Button Command="{Binding TestCommand}" CommandParameter="写工艺质量数据" Height=" 20" Width="120" Content="" Margin="5"/>
                             </StackPanel>
-                           
+
                         </GroupBox>
                     </Grid>
                 </Grid>
-               
             </Grid>
         </Grid>
-        
+
         <StatusBarItem Grid.Row="2">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="PLC"  Margin="5"/>

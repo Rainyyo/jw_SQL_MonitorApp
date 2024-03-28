@@ -154,5 +154,29 @@ namespace MonitorApp.Properties {
                 this["急停"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        public int 报警起始地址 {
+            get {
+                return ((int)(this["报警起始地址"]));
+            }
+            set {
+                this["报警起始地址"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        public int 报警点位个数 {
+            get {
+                return ((int)(this["报警点位个数"]));
+            }
+            set {
+                this["报警点位个数"] = value;
+            }
+        }
     }
 }

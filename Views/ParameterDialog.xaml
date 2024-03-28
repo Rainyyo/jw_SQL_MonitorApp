@@ -17,20 +17,51 @@
         </Style>
     </prism:Dialog.WindowStyle>
     <Grid>
-        <GroupBox Header="配置">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <GroupBox Header="PLC报警参数配置">
             <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="起始地址:"/>
+                    <TextBox Text="{Binding StartAddr}"
+                             Width="40"
+                             Margin="5">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="LostFocus">
+                                <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="起始地址" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </TextBox>
+                    <Label  Content="点位个数:"/>
+                    <TextBox Text="{Binding CountAddr}"
+                             Width="40"
+                             Margin="5">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="LostFocus">
+                                <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="点位个数" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </TextBox>
+                </StackPanel>
                 <StackPanel Orientation="Horizontal" >
-                    <Label Content="报警文件"/>
-                    <TextBox Text="{Binding FilePath}" Height="20" Width="200" Margin="5"/>
+                    <Label Content="报警文件路径:"/>
+                    <TextBox Text="{Binding FilePath}" Height="20" Width="200" Margin="5" IsReadOnly="True"/>
                     <Button Content="打开" Command="{Binding LoadFile}" Height="20" Width="50" Margin="5"/>
                 </StackPanel>
+
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="#" Grid.Row="1">
+            <StackPanel>
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
                         <Label Content="待料"/>
                         <TextBox Height="15"
-                                 Width="40"
-                                 Margin="5"
-                                 Text="{Binding LoadState}">
+                  Width="40"
+                  Margin="5"
+                  Text="{Binding LoadState}">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="LostFocus">
                                     <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="待料" />
@@ -41,9 +72,9 @@
                     <StackPanel Orientation="Horizontal">
                         <Label Content="生产"/>
                         <TextBox Height="15"
-                                 Width="40"
-                                 Margin="5"
-                                 Text="{Binding Producting}">
+                  Width="40"
+                  Margin="5"
+                  Text="{Binding Producting}">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="LostFocus">
                                     <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="生产" />

@@ -13,12 +13,26 @@ namespace MonitorApp.ViewModels
     public class ParameterDialogViewModel : DialogViewModel
     {
         #region 属性
+        private int startAddr;
+        public int StartAddr
+        {
+            get { return startAddr; }
+            set { SetProperty(ref startAddr, value); }
+        }
+        private int countAddr;
+        public int CountAddr
+        {
+            get { return countAddr; }
+            set { SetProperty(ref countAddr, value); }
+        }
         private string filePath;
         public string FilePath
         {
             get { return filePath; }
             set { SetProperty(ref filePath, value); }
         }
+
+
         private int loadState;
         public int LoadState
         {
@@ -75,14 +89,20 @@ namespace MonitorApp.ViewModels
             {
                 switch (str)
                 {
+                    case "起始地址":
+                        Settings.Default.报警起始地址 = StartAddr;
+                        break;
+                    case "点位个数":
+                        Settings.Default.报警点位个数 = CountAddr;
+                        break;
+
+
                     case "待料":
                         Settings.Default.待料 = LoadState;
                         break;
-
                     case "生产":
                         Settings.Default.生产 = Producting;
                         break;
-
                     case "暂停":
                         Settings.Default.暂停 = Pause;
                         break;
@@ -98,12 +118,14 @@ namespace MonitorApp.ViewModels
         public ParameterDialogViewModel(IContainerProvider containerProvider) : base(containerProvider)
         {
             Title = "参数设置";
+            StartAddr = Settings.Default.报警起始地址;
+            CountAddr = Settings.Default.报警点位个数;
             FilePath = Settings.Default.Filer;
+
             LoadState = Settings.Default.待料;
             Producting = Settings.Default.生产;
             Pause = Settings.Default.暂停;
             Stop = Settings.Default.急停;
-
         }
         #endregion
 
