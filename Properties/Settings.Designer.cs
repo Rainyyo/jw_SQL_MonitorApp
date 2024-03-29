@@ -109,7 +109,7 @@ namespace MonitorApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2530")]
+        [global::System.Configuration.DefaultSettingValueAttribute("60")]
         public int 待料 {
             get {
                 return ((int)(this["待料"]));
@@ -121,7 +121,7 @@ namespace MonitorApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2530")]
+        [global::System.Configuration.DefaultSettingValueAttribute("70")]
         public int 生产 {
             get {
                 return ((int)(this["生产"]));
@@ -133,7 +133,7 @@ namespace MonitorApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2531")]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
         public int 暂停 {
             get {
                 return ((int)(this["暂停"]));
@@ -145,7 +145,7 @@ namespace MonitorApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("240")]
+        [global::System.Configuration.DefaultSettingValueAttribute("22")]
         public int 急停 {
             get {
                 return ((int)(this["急停"]));
@@ -157,7 +157,7 @@ namespace MonitorApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        [global::System.Configuration.DefaultSettingValueAttribute("101")]
         public int 报警起始地址 {
             get {
                 return ((int)(this["报警起始地址"]));
@@ -169,7 +169,7 @@ namespace MonitorApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
         public int 报警点位个数 {
             get {
                 return ((int)(this["报警点位个数"]));

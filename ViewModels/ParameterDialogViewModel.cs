@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MonitorApp.Properties;
 using Microsoft.Win32;
+using System.Windows;
 
 namespace MonitorApp.ViewModels
 {
@@ -86,6 +87,7 @@ namespace MonitorApp.ViewModels
                 Properties.Settings.Default.Filer = FilePath;
                 Properties.Settings.Default.Save();
             }
+            MessageBox.Show("请重启软件加载配置！！！","消息");
         }
         private DelegateCommand<object> textBoxLostFocusCommand;
         public DelegateCommand<object> TextBoxLostFocusCommand =>

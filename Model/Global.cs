@@ -132,7 +132,7 @@ namespace MonitorApp.Model
             }
 
         }
-        public static async Task<string> Insert_pc_signal_status(string 信号代码, string 信号描述, string 信号值)//设备实时信号
+        public static async Task<string> Insert_pc_signal_status(string 信号代码, string 信号描述, int 信号值)//设备实时信号
         {
             await Task.Delay(100);
             MySQL_ConnectionMsg();

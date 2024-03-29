@@ -3,9 +3,13 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>pre_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Views\pre_icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="pre_icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BingLibraryLite" Version="2.2.4-pre" />

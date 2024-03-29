@@ -24,22 +24,22 @@
       <Value Profile="(Default)">jw-eap</Value>
     </Setting>
     <Setting Name="待料" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">2530</Value>
+      <Value Profile="(Default)">60</Value>
     </Setting>
     <Setting Name="生产" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">2530</Value>
+      <Value Profile="(Default)">70</Value>
     </Setting>
     <Setting Name="暂停" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">2531</Value>
+      <Value Profile="(Default)">100</Value>
     </Setting>
     <Setting Name="急停" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">240</Value>
+      <Value Profile="(Default)">22</Value>
     </Setting>
     <Setting Name="报警起始地址" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">300</Value>
+      <Value Profile="(Default)">101</Value>
     </Setting>
     <Setting Name="报警点位个数" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">200</Value>
+      <Value Profile="(Default)">100</Value>
     </Setting>
     <Setting Name="AppName" Type="System.String" Scope="User">
       <Value Profile="(Default)">CCS_热铆机</Value>

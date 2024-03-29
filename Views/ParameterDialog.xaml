@@ -108,7 +108,7 @@
                             </i:Interaction.Triggers>
                         </TextBox>
                     </StackPanel>
-                    <!--<StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal">
                         <Label Content="急停"/>
                         <TextBox Height="15" Width="40" Margin="5" Text="{Binding Stop}">
                             <i:Interaction.Triggers>
@@ -117,7 +117,7 @@
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                         </TextBox>
-                    </StackPanel>-->
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
         </GroupBox>
