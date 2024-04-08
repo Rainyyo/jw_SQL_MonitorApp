@@ -42,7 +42,7 @@
       <Value Profile="(Default)">100</Value>
     </Setting>
     <Setting Name="AppName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">CCS_热铆机</Value>
+      <Value Profile="(Default)">CCS_</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -44,8 +44,6 @@ namespace MonitorApp.ViewModels
         bool mPreProducting = false;//生产
         bool mPrePause = false;//暂停
         bool mPreStop = false;//停止
-
-
         #endregion
         #region 属性
         private string _title = "MonitorApp";
@@ -157,7 +155,7 @@ namespace MonitorApp.ViewModels
         }
         void ExecuteClickState()
         {
-            if (ID==null)
+            if (ID == null)
             {
                 MessageBox.Show("请输入工号再进行上机/下机操作！！！");
                 return;
@@ -232,8 +230,6 @@ namespace MonitorApp.ViewModels
                             }
                         }
                     }
-
-
                     break;
                 case "写数据报警描述数据":
                     var res = await Global.Insert_pc_data_alarm("3213", "wangring", "1");
@@ -320,7 +316,7 @@ namespace MonitorApp.ViewModels
         }
         void ExecuteAppClosedEventCommand()
         {
-            if (ID!=null)
+            if (ID != null)
             {
                 var res = Global.Insert_pc_data_emp(ID, Name, "OUTTIME", "下机");
             }
@@ -334,7 +330,7 @@ namespace MonitorApp.ViewModels
         {
             pLC = containerProvider.Resolve<IPLCService>("PLC");//初始化
             _dialogService = containerProvider.Resolve<IDialogService>();
-            AppName=Settings.Default.AppName;
+            AppName = Settings.Default.AppName;
             MySQL_ConnectionMsg();
             Global.Ini();
             Add_SQL_data_alarm();
@@ -358,7 +354,8 @@ namespace MonitorApp.ViewModels
         }
         private void PLC_ReadWarningAction()
         {
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 while (true)
                 {
                     if (pLC.Connected)
@@ -370,7 +367,7 @@ namespace MonitorApp.ViewModels
                             //读报警地址
                             var WarningFileMsg = File.ReadAllLines(FileName, Encoding.UTF8);
                             var WarringAddr = pLC.ReadMCoils(起始地址, 地址个数);
-                            
+
                             if (mPreWarning1 != null)
                             {
                                 for (int i = 0; i < WarringAddr.Length; i++)
@@ -415,7 +412,7 @@ namespace MonitorApp.ViewModels
                                                     }); ;
                                                 }
                                             }
-                                            addMessage("M"  + (i + 起始地址) + "|报警解除");
+                                            addMessage("M" + (i + 起始地址) + "|报警解除");
                                         }
                                     }
                                 }
@@ -430,9 +427,9 @@ namespace MonitorApp.ViewModels
                     Thread.Sleep(100);
                 }
             });
-          
+
         }
-        private  void Add_SQL_data_alarm()
+        private void Add_SQL_data_alarm()
         {
             Task.Run(async () =>
             {
@@ -462,17 +459,17 @@ namespace MonitorApp.ViewModels
                 {
                     if (pLC.Connected)
                     {
-                        var LoadSatet= pLC.ReadMCoils(Settings.Default.待料,1);
-                        var Producting = pLC.ReadMCoils(Settings.Default.生产,1);
-                        var Pause = pLC.ReadMCoils(Settings.Default.暂停 ,1);
-                        var Stop = pLC.ReadMCoils(Settings.Default.急停,1);
+                        var LoadSatet = pLC.ReadMCoils(Settings.Default.待料, 1);
+                        var Producting = pLC.ReadMCoils(Settings.Default.生产, 1);
+                        var Pause = pLC.ReadMCoils(Settings.Default.暂停, 1);
+                        var Stop = pLC.ReadMCoils(Settings.Default.急停, 1);
                         #region 待料
-                        if (LoadSatet[0]!=mPreLoadState)
+                        if (LoadSatet[0] != mPreLoadState)
                         {
                             if (LoadSatet[0])
                             {
                                 addMessage("待料中");
-                                var res = await Global.Insert_pc_signal_status((Settings.Default.待料).ToString(), "待料", 1);
+                                var res = await Global.Insert_pc_signal_status("WAITMATERIAL", "待料", 1);
                                 if (res == "ok")
                                 {
                                     addMessage("触发|待料信息写入成功！");
@@ -484,7 +481,7 @@ namespace MonitorApp.ViewModels
                             }
                             else
                             {
-                                var res = await Global.Insert_pc_signal_status((Settings.Default.待料).ToString(), "待料", 0);
+                                var res = await Global.Insert_pc_signal_status("WAITMATERIAL", "待料", 0);
                                 if (res == "ok")
                                 {
                                     addMessage("复位|待料信息写入成功！");
@@ -498,12 +495,12 @@ namespace MonitorApp.ViewModels
                         }
                         #endregion
                         #region 生产
-                        if (Producting[0]!=mPreProducting)
+                        if (Producting[0] != mPreProducting)
                         {
                             if (Producting[0])
                             {
                                 addMessage("生产中");
-                                var res = await Global.Insert_pc_signal_status((Settings.Default.生产).ToString(), "生产", 1);
+                                var res = await Global.Insert_pc_signal_status("PRODUCT", "生产", 1);
                                 if (res == "ok")
                                 {
                                     addMessage("触发|生产信息写入成功！");
@@ -515,7 +512,7 @@ namespace MonitorApp.ViewModels
                             }
                             else
                             {
-                                var res = await Global.Insert_pc_signal_status((Settings.Default.生产).ToString(), "生产", 0);
+                                var res = await Global.Insert_pc_signal_status("PRODUCT", "生产", 0);
                                 if (res == "ok")
                                 {
                                     addMessage("复位|生产信息写入成功！");
@@ -530,43 +527,43 @@ namespace MonitorApp.ViewModels
 
                         #endregion
                         #region 暂停
-                        if (Pause[0]!=mPrePause)
-                        {
-                            if (Pause[0])
-                            {
-                                addMessage("暂停中");
-                                var res = await Global.Insert_pc_signal_status((Settings.Default.暂停).ToString(), "暂停", 1);
-                                if (res == "ok")
-                                {
-                                    addMessage("触发|暂停信息写入成功！");
-                                }
-                                else
-                                {
-                                    addMessage("触发|暂停信息写入失败！");
-                                }
-                            }
-                            else
-                            {
-                                var res = await Global.Insert_pc_signal_status((Settings.Default.生产).ToString(), "暂停", 0);
-                                if (res == "ok")
-                                {
-                                    addMessage("复位|暂停信息写入成功！");
-                                }
-                                else
-                                {
-                                    addMessage("复位|暂停信息写入失败！");
-                                }
-                            }
-                            mPrePause = Pause[0];
-                        }
+                        //if (Pause[0] != mPrePause)
+                        //{
+                        //    if (Pause[0])
+                        //    {
+                        //        addMessage("暂停中");
+                        //        var res = await Global.Insert_pc_signal_status((Settings.Default.暂停).ToString(), "暂停", 1);
+                        //        if (res == "ok")
+                        //        {
+                        //            addMessage("触发|暂停信息写入成功！");
+                        //        }
+                        //        else
+                        //        {
+                        //            addMessage("触发|暂停信息写入失败！");
+                        //        }
+                        //    }
+                        //    else
+                        //    {
+                        //        var res = await Global.Insert_pc_signal_status((Settings.Default.生产).ToString(), "暂停", 0);
+                        //        if (res == "ok")
+                        //        {
+                        //            addMessage("复位|暂停信息写入成功！");
+                        //        }
+                        //        else
+                        //        {
+                        //            addMessage("复位|暂停信息写入失败！");
+                        //        }
+                        //    }
+                        //    mPrePause = Pause[0];
+                        //}
                         #endregion
                         #region 急停
-                        if (Stop[0]!=mPreStop)
+                        if (Stop[0] != mPreStop)
                         {
                             if (Stop[0])
                             {
                                 addMessage("急停中");
-                                var res = await Global.Insert_pc_signal_status((Settings.Default.急停).ToString(), "急停", 1);
+                                var res = await Global.Insert_pc_signal_status("EMERGENCYSTOP", "急停", 1);
                                 if (res == "ok")
                                 {
                                     addMessage("触发|急停信息写入成功！");
@@ -575,11 +572,11 @@ namespace MonitorApp.ViewModels
                                 {
                                     addMessage("触发|急停信息写入失败！");
                                 }
-                                
+
                             }
                             else
                             {
-                                var res = await Global.Insert_pc_signal_status((Settings.Default.急停).ToString(), "急停", 0);
+                                var res = await Global.Insert_pc_signal_status("EMERGENCYSTOP", "急停", 0);
                                 if (res == "ok")
                                 {
                                     addMessage("复位|急停信息写入成功！");
@@ -606,6 +603,7 @@ namespace MonitorApp.ViewModels
             builder.UserID = Settings.Default.MySQL_UserID;
             builder.Password = Settings.Default.MySQL_Password;
             builder.Database = Settings.Default.MySQL_Database;
+            builder.CharacterSet = "gb2312";
         }
 
         static bool CheckIfDatabaseExists(MySqlConnection connection, string databaseName)

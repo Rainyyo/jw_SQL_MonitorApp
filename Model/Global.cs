@@ -57,6 +57,7 @@ namespace MonitorApp.Model
             builder.UserID = Settings.Default.MySQL_UserID;
             builder.Password = Settings.Default.MySQL_Password;
             builder.Database = Settings.Default.MySQL_Database;
+            builder.CharacterSet = "gb2312";
         }
         public static string Insert_pc_data_emp(string 员工号, string 员工姓名, string 操作代码, string 操作名称)//员工上下机记录上传
         {

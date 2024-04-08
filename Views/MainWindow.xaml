@@ -110,7 +110,7 @@
                         </GroupBox>
                     </Grid>
                     <Grid Grid.Row="3">
-                        <GroupBox Header="测试">
+                        <GroupBox Header="测试" Visibility="Collapsed">
                             <StackPanel Margin="5">
                                 <Button Command="{Binding TestCommand}" CommandParameter="新建数据库" Height=" 20" Width="120" Content="打印数据库表信息" Margin="5"/>
                                 <Button Command="{Binding TestCommand}" CommandParameter="写数据报警描述数据" Height=" 20" Width="120" Content="写数据报警描述数据" Margin="5"/>

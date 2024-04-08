@@ -181,7 +181,7 @@ namespace MonitorApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("CCS_热铆机")]
+        [global::System.Configuration.DefaultSettingValueAttribute("CCS_")]
         public string AppName {
             get {
                 return ((string)(this["AppName"]));
