@@ -87,7 +87,11 @@ namespace MonitorApp.ViewModels
                 Properties.Settings.Default.Filer = FilePath;
                 Properties.Settings.Default.Save();
             }
-            MessageBox.Show("请重启软件加载配置！！！","消息");
+            MessageBoxResult messageBoxResult = MessageBox.Show("请重启软件加载配置！！！", "消息", MessageBoxButton.OKCancel);
+            if (messageBoxResult == MessageBoxResult.OK)
+            {
+                Environment.Exit(0);
+            }
         }
         private DelegateCommand<object> textBoxLostFocusCommand;
         public DelegateCommand<object> TextBoxLostFocusCommand =>

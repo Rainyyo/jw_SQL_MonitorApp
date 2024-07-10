@@ -599,7 +599,7 @@ namespace MonitorApp.ViewModels
                     catch (Exception ex)
                     {
                         Thread.Sleep(5000);
-                        addMessage("机台信号监控失败："+ ex);
+                        addMessage("监控PLC机台信号失败：" + ex);
                     }
                     
                 }
