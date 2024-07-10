@@ -282,7 +282,7 @@ namespace MonitorApp.ViewModels
                 else
                 {
                     //读PLC
-                    addMessage("PLC连接成功!");
+                    addMessage("PLC："+Properties.Settings.Default.PLC+"连接成功!" );
                     Task.Run(() => Monitor_PLC_State());//设备运行状态
                     Task.Run(() => PLC_ReadWarningAction());//设备报警信号
                 }
@@ -421,10 +421,11 @@ namespace MonitorApp.ViewModels
                         }
                         catch (Exception ex)
                         {
-                            //addMessage("PLC读报警文件失败！");
+                            Thread.Sleep(50000);
+                            addMessage("PLC读报警文件失败！"+ex);
                         }
                     }
-                    Thread.Sleep(100);
+                    Thread.Sleep(200);
                 }
             });
 
@@ -447,6 +448,7 @@ namespace MonitorApp.ViewModels
                             else { addMessage("报警信息写入数据库失败！"); }
                         }
                     }
+                    Thread.Sleep(200);
                 }
             });
 
@@ -457,139 +459,149 @@ namespace MonitorApp.ViewModels
             {
                 while (true)
                 {
-                    if (pLC.Connected)
+                    try
                     {
-                        var LoadSatet = pLC.ReadMCoils(Settings.Default.待料, 1);
-                        var Producting = pLC.ReadMCoils(Settings.Default.生产, 1);
-                        var Pause = pLC.ReadMCoils(Settings.Default.暂停, 1);
-                        var Stop = pLC.ReadMCoils(Settings.Default.急停, 1);
-                        #region 待料
-                        if (LoadSatet[0] != mPreLoadState)
+                        if (pLC.Connected)
                         {
-                            if (LoadSatet[0])
+                            var LoadSatet = pLC.ReadMCoils(Settings.Default.待料, 1);
+                            var Producting = pLC.ReadMCoils(Settings.Default.生产, 1);
+                            var Pause = pLC.ReadMCoils(Settings.Default.暂停, 1);
+                            var Stop = pLC.ReadMCoils(Settings.Default.急停, 1);
+                            #region 待料
+                            if (LoadSatet[0] != mPreLoadState)
                             {
-                                addMessage("待料中");
-                                var res = await Global.Insert_pc_signal_status("WAITMATERIAL", "待料", 1);
-                                if (res == "ok")
+                                if (LoadSatet[0])
                                 {
-                                    addMessage("触发|待料信息写入成功！");
+                                    addMessage("待料中");
+                                    var res = await Global.Insert_pc_signal_status("WAITMATERIAL", "待料", 1);
+                                    if (res == "ok")
+                                    {
+                                        addMessage("触发|待料信息写入成功！");
+                                    }
+                                    else
+                                    {
+                                        addMessage("触发|待料信息写入失败！");
+                                    }
                                 }
                                 else
                                 {
-                                    addMessage("触发|待料信息写入失败！");
+                                    var res = await Global.Insert_pc_signal_status("WAITMATERIAL", "待料", 0);
+                                    if (res == "ok")
+                                    {
+                                        addMessage("复位|待料信息写入成功！");
+                                    }
+                                    else
+                                    {
+                                        addMessage("复位|待料信息写入失败！");
+                                    }
                                 }
+                                mPreLoadState = LoadSatet[0];
                             }
-                            else
+                            #endregion
+                            #region 生产
+                            if (Producting[0] != mPreProducting)
                             {
-                                var res = await Global.Insert_pc_signal_status("WAITMATERIAL", "待料", 0);
-                                if (res == "ok")
+                                if (Producting[0])
                                 {
-                                    addMessage("复位|待料信息写入成功！");
+                                    addMessage("生产中");
+                                    var res = await Global.Insert_pc_signal_status("PRODUCT", "生产", 1);
+                                    if (res == "ok")
+                                    {
+                                        addMessage("触发|生产信息写入成功！");
+                                    }
+                                    else
+                                    {
+                                        addMessage("触发|生产信息写入失败！");
+                                    }
                                 }
                                 else
                                 {
-                                    addMessage("复位|待料信息写入失败！");
+                                    var res = await Global.Insert_pc_signal_status("PRODUCT", "生产", 0);
+                                    if (res == "ok")
+                                    {
+                                        addMessage("复位|生产信息写入成功！");
+                                    }
+                                    else
+                                    {
+                                        addMessage("复位|生产信息写入失败！");
+                                    }
                                 }
+                                mPreProducting = Producting[0];
                             }
-                            mPreLoadState = LoadSatet[0];
-                        }
-                        #endregion
-                        #region 生产
-                        if (Producting[0] != mPreProducting)
-                        {
-                            if (Producting[0])
-                            {
-                                addMessage("生产中");
-                                var res = await Global.Insert_pc_signal_status("PRODUCT", "生产", 1);
-                                if (res == "ok")
-                                {
-                                    addMessage("触发|生产信息写入成功！");
-                                }
-                                else
-                                {
-                                    addMessage("触发|生产信息写入失败！");
-                                }
-                            }
-                            else
-                            {
-                                var res = await Global.Insert_pc_signal_status("PRODUCT", "生产", 0);
-                                if (res == "ok")
-                                {
-                                    addMessage("复位|生产信息写入成功！");
-                                }
-                                else
-                                {
-                                    addMessage("复位|生产信息写入失败！");
-                                }
-                            }
-                            mPreProducting = Producting[0];
-                        }
 
-                        #endregion
-                        #region 暂停
-                        //if (Pause[0] != mPrePause)
-                        //{
-                        //    if (Pause[0])
-                        //    {
-                        //        addMessage("暂停中");
-                        //        var res = await Global.Insert_pc_signal_status((Settings.Default.暂停).ToString(), "暂停", 1);
-                        //        if (res == "ok")
-                        //        {
-                        //            addMessage("触发|暂停信息写入成功！");
-                        //        }
-                        //        else
-                        //        {
-                        //            addMessage("触发|暂停信息写入失败！");
-                        //        }
-                        //    }
-                        //    else
-                        //    {
-                        //        var res = await Global.Insert_pc_signal_status((Settings.Default.生产).ToString(), "暂停", 0);
-                        //        if (res == "ok")
-                        //        {
-                        //            addMessage("复位|暂停信息写入成功！");
-                        //        }
-                        //        else
-                        //        {
-                        //            addMessage("复位|暂停信息写入失败！");
-                        //        }
-                        //    }
-                        //    mPrePause = Pause[0];
-                        //}
-                        #endregion
-                        #region 急停
-                        if (Stop[0] != mPreStop)
-                        {
-                            if (Stop[0])
+                            #endregion
+                            #region 暂停
+                            //if (Pause[0] != mPrePause)
+                            //{
+                            //    if (Pause[0])
+                            //    {
+                            //        addMessage("暂停中");
+                            //        var res = await Global.Insert_pc_signal_status((Settings.Default.暂停).ToString(), "暂停", 1);
+                            //        if (res == "ok")
+                            //        {
+                            //            addMessage("触发|暂停信息写入成功！");
+                            //        }
+                            //        else
+                            //        {
+                            //            addMessage("触发|暂停信息写入失败！");
+                            //        }
+                            //    }
+                            //    else
+                            //    {
+                            //        var res = await Global.Insert_pc_signal_status((Settings.Default.生产).ToString(), "暂停", 0);
+                            //        if (res == "ok")
+                            //        {
+                            //            addMessage("复位|暂停信息写入成功！");
+                            //        }
+                            //        else
+                            //        {
+                            //            addMessage("复位|暂停信息写入失败！");
+                            //        }
+                            //    }
+                            //    mPrePause = Pause[0];
+                            //}
+                            #endregion
+                            #region 急停
+                            if (Stop[0] != mPreStop)
                             {
-                                addMessage("急停中");
-                                var res = await Global.Insert_pc_signal_status("EMERGENCYSTOP", "急停", 1);
-                                if (res == "ok")
+                                if (Stop[0])
                                 {
-                                    addMessage("触发|急停信息写入成功！");
-                                }
-                                else
-                                {
-                                    addMessage("触发|急停信息写入失败！");
-                                }
+                                    addMessage("急停中");
+                                    var res = await Global.Insert_pc_signal_status("EMERGENCYSTOP", "急停", 1);
+                                    if (res == "ok")
+                                    {
+                                        addMessage("触发|急停信息写入成功！");
+                                    }
+                                    else
+                                    {
+                                        addMessage("触发|急停信息写入失败！");
+                                    }
 
-                            }
-                            else
-                            {
-                                var res = await Global.Insert_pc_signal_status("EMERGENCYSTOP", "急停", 0);
-                                if (res == "ok")
-                                {
-                                    addMessage("复位|急停信息写入成功！");
                                 }
                                 else
                                 {
-                                    addMessage("复位|急停信息写入失败！");
+                                    var res = await Global.Insert_pc_signal_status("EMERGENCYSTOP", "急停", 0);
+                                    if (res == "ok")
+                                    {
+                                        addMessage("复位|急停信息写入成功！");
+                                    }
+                                    else
+                                    {
+                                        addMessage("复位|急停信息写入失败！");
+                                    }
                                 }
+                                mPreStop = Stop[0];
                             }
-                            mPreStop = Stop[0];
+                            #endregion
                         }
-                        #endregion
+                        Thread.Sleep(200);
                     }
+                    catch (Exception ex)
+                    {
+                        Thread.Sleep(5000);
+                        addMessage("机台信号监控失败："+ ex);
+                    }
+                    
                 }
             });
         }
