@@ -277,7 +277,7 @@ namespace MonitorApp.ViewModels
 
                 if (!r)
                 {
-                    addMessage($"PLC{Settings.Default.PLC}连接失败");
+                    logger.Error("PLC连接失败");
                 }
                 else
                 {
