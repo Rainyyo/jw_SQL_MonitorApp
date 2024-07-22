@@ -20,6 +20,8 @@ namespace MonitorApp.Model
         public static MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder();
         public static string WarningAddr = "";
         public static string[] WarningMsg = null;
+
+        public static string GlobalFile = AppDomain.CurrentDomain.BaseDirectory + "Global.ini";
         #endregion
 
         public static void Ini()

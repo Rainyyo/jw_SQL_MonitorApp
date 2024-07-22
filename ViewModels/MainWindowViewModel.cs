@@ -26,6 +26,7 @@ using System.Windows;
 using OfficeOpenXml;
 using System.Collections.Concurrent;
 using System.Timers;
+using System.Formats.Asn1;
 
 namespace MonitorApp.ViewModels
 {
@@ -45,9 +46,15 @@ namespace MonitorApp.ViewModels
         bool mPreProducting = false;//生产
         bool mPrePause = false;//暂停
         bool mPreStop = false;//停止
-        bool IsMonitor=false;
+        bool IsMonitor = false;
 
+        private System.Timers.Timer MonitorMachineStatustimer;
         private System.Timers.Timer timer;
+        private DateTime NextMorningReset;
+        private DateTime NextEveningReset;
+        private int RunTimes = 0;
+        private int StopTimes = 0;
+        private int WaitTimes = 0;
         #endregion
         #region 属性
         private string _title = "MonitorApp";
@@ -118,6 +125,13 @@ namespace MonitorApp.ViewModels
         {
             get { return name; }
             set { SetProperty(ref name, value); }
+        }
+
+        private string banci;
+        public string Banci
+        {
+            get { return banci; }
+            set { SetProperty(ref banci, value); }
         }
         #endregion
         #region 命令绑定
@@ -281,7 +295,7 @@ namespace MonitorApp.ViewModels
 
                 if (!r)
                 {
-                    logger.Error($"PLC："+Properties.Settings.Default.PLC+"连接失败");
+                    logger.Error($"PLC：" + Properties.Settings.Default.PLC + "连接失败");
                 }
                 else
                 {
@@ -336,12 +350,22 @@ namespace MonitorApp.ViewModels
         #region 构造函数
         public MainWindowViewModel(IContainerProvider containerProvider)
         {
+
             pLC = containerProvider.Resolve<IPLCService>("PLC");//初始化
             _dialogService = containerProvider.Resolve<IDialogService>();
             AppName = Settings.Default.AppName;
             MySQL_ConnectionMsg();
             Global.Ini();
+
+            Banci = DXH.Ini.DXHIni.ContentReader("System", "Banci", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
+            RunTimes = Convert.ToInt32(DXH.Ini.DXHIni.ContentReader("System", "RunTimes", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini")));
+            StopTimes = Convert.ToInt32(DXH.Ini.DXHIni.ContentReader("System", "StopTimes", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini")));
+            WaitTimes = Convert.ToInt32(DXH.Ini.DXHIni.ContentReader("System", "WaitTimes", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini")));
+
+
             Add_SQL_data_alarm();
+            SetTimer(); //换班计时器
+            SetTimer2();//设备状态监控计时器
         }
         #endregion
         #region 功能函数
@@ -395,7 +419,7 @@ namespace MonitorApp.ViewModels
                                                     addMessage(errorMsg);
                                                     WarningQueue.Enqueue(new SignalMsg()
                                                     {
-                                                        WarningAddr = "M"+ plcAddr,
+                                                        WarningAddr = "M" + plcAddr,
                                                         WarningMsg = errorMsg,
                                                         WarningTrigger = 1
                                                     });
@@ -415,7 +439,7 @@ namespace MonitorApp.ViewModels
                                                     WarningQueue.Enqueue(new SignalMsg()
                                                     {
 
-                                                        WarningAddr = "M"+ plcAddr,
+                                                        WarningAddr = "M" + plcAddr,
                                                         WarningMsg = errorMsg,
                                                         WarningTrigger = 0
                                                     }); ;
@@ -431,7 +455,7 @@ namespace MonitorApp.ViewModels
                         catch (Exception ex)
                         {
                             Thread.Sleep(50000);
-                            addMessage("PLC读报警文件失败！"+ex);
+                            addMessage("PLC读报警文件失败！" + ex);
                         }
                     }
                     Thread.Sleep(200);
@@ -610,21 +634,111 @@ namespace MonitorApp.ViewModels
                         Thread.Sleep(5000);
                         addMessage("监控PLC机台信号失败：" + ex);
                     }
-                    
+
                 }
             });
         }
         private void SetTimer()
         {
-            timer = new System.Timers.Timer(60000);
+            timer = new System.Timers.Timer(1);
             timer.Elapsed += new System.Timers.ElapsedEventHandler(Timer_Elapsed);
             timer.AutoReset = true;
             timer.Enabled = true;
         }
 
+        private void SetTimer2()
+        {
+            MonitorMachineStatustimer = new System.Timers.Timer(60000);
+            MonitorMachineStatustimer.Elapsed += MonitorMachineStatus_Elapsed;
+            MonitorMachineStatustimer.AutoReset = true;
+            MonitorMachineStatustimer.Enabled = true;
+        }
+
+        private void MonitorMachineStatus_Elapsed(object sender, ElapsedEventArgs e)
+        {
+
+            var LoadSatet = pLC.ReadMCoils(Settings.Default.待料, 1);
+            var Producting = pLC.ReadMCoils(Settings.Default.生产, 1);
+            var Pause = pLC.ReadMCoils(Settings.Default.暂停, 1);
+            //var Stop = pLC.ReadMCoils(Settings.Default.急停, 1);
+            if (LoadSatet[0])
+            {
+                WaitTimes++;
+                
+            }
+
+            if (Producting[0])
+            {
+                RunTimes++;
+                Global.Insert_pc_data_craft("LOT001", "SETID001","RUN_TIME","当班运行时间","min","0", RunTimes.ToString());
+            }
+
+            if (Pause[0])
+            {
+                StopTimes++;
+            }
+            WriteFile();
+            
+        }
+
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-           
+            var _banci = GetBanci();
+            if (_banci == Banci)
+            {
+                Banci = _banci;
+                addMessage($"\"{Banci}\"换班数据清零");
+                RunTimes = 0;
+                StopTimes = 0;
+                WaitTimes = 0;
+                WriteFile();
+            }
+        }
+
+        void WriteFile()
+        {
+            try
+            {
+                //DateTime now = DateTime.Now;
+
+                //// 计算到下一次早上8点和晚上8点的时间间隔
+                //NextMorningReset = now.Date.AddHours(8);
+                //NextEveningReset = now.Date.AddHours(20);
+                //DXH.Ini.DXHIni.WritePrivateProfileString("System", "NextMorningReset", NextMorningReset.ToString(), System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
+                //DXH.Ini.DXHIni.WritePrivateProfileString("System", "NextEveningReset", NextEveningReset.ToString(), System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
+
+                DXH.Ini.DXHIni.WritePrivateProfileString("System", "Banci", Banci, System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
+                DXH.Ini.DXHIni.WritePrivateProfileString("System", "RunTimes", RunTimes.ToString(), System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
+                DXH.Ini.DXHIni.WritePrivateProfileString("System", "StopTimes", StopTimes.ToString(), System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
+                DXH.Ini.DXHIni.WritePrivateProfileString("System", "WaitTimes", WaitTimes.ToString(), System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
+            }
+            catch (Exception ex)
+            {
+                addMessage(ex.Message);
+            }
+        }
+        public string GetBanci()
+        {
+            string rs = "";
+            if (DateTime.Now.Hour >= 8 && DateTime.Now.Hour < 20)
+            {
+                //rs += DateTime.Now.ToString("yyyyMMddHHmmssff") ;
+                rs += DateTime.Now.ToString("HHmmss");
+            }
+            else
+            {
+                if (DateTime.Now.Hour >= 0 && DateTime.Now.Hour < 8)
+                {
+                    //rs += DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssff") ;
+                    rs += DateTime.Now.AddDays(-1).ToString("HHmmss");
+                }
+                else
+                {
+                    //rs += DateTime.Now.ToString("yyyyMMddHHmmssff");
+                    rs += DateTime.Now.ToString("HHmmss");
+                }
+            }
+            return rs;
         }
         #endregion
         #region 数据库功能函数
