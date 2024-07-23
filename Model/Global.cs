@@ -21,12 +21,55 @@ namespace MonitorApp.Model
         public static string WarningAddr = "";
         public static string[] WarningMsg = null;
 
-        public static string GlobalFile = AppDomain.CurrentDomain.BaseDirectory + "Global.ini";
+        public static string GlobalFile = AppDomain.CurrentDomain.BaseDirectory + "Count.ini";
         #endregion
+        #region 参数属性
 
+        //static string mBanci = "080000";
+        //public static string Banci
+        //{
+        //    get { return mBanci; }
+        //    set
+        //    {
+        //        mBanci = value;
+        //        DXH.Ini.DXHIni.WritePrivateProfileString("System", "Banci", mBanci, GlobalFile);
+        //    }
+        //}
+        static int mRunTimes = 0;
+        public static int RunTimes
+        {
+            get { return mRunTimes; }
+            set
+            {
+                mRunTimes = value;
+                DXH.Ini.DXHIni.WritePrivateProfileString("System", "RunTimes", mRunTimes.ToString(), GlobalFile);
+            }
+        }
+        static int mStopTimes = 0;
+        public static int StopTimes
+        {
+            get { return mStopTimes; }
+            set
+            {
+                mStopTimes = value;
+                DXH.Ini.DXHIni.WritePrivateProfileString("System", "StopTimes", mStopTimes.ToString(), GlobalFile);
+            }
+        }
+        static int mWaitTimes = 0;
+        public static int WaitTimes
+        {
+            get { return mWaitTimes; }
+            set
+            {
+                mWaitTimes = value;
+                DXH.Ini.DXHIni.WritePrivateProfileString("System", "WaitTimes", mWaitTimes.ToString(), GlobalFile);
+            }
+        }
+        #endregion
         public static void Ini()
         {
             NlogConfig();
+            //LoadIni();
         }
         public static void NlogConfig()
         {
@@ -171,7 +214,7 @@ namespace MonitorApp.Model
                 }
             }
         }
-        public static async Task<string> Insert_pc_data_craft(string 批次号, string 版号, string 项目代码, string 项目描述, string 单位, string 采集值, string isok)//工艺质量
+        public static async Task<string> Insert_pc_data_craft(string 项目代码, string 项目描述, string 单位, int 采集值, string 时间组号, DateTime 时间, string 批次号 = "LOT001", string 版号 = "SETID001", bool isok = false)//工艺质量
         {
             await Task.Delay(100);
             MySQL_ConnectionMsg();
@@ -192,9 +235,11 @@ namespace MonitorApp.Model
                     command.Parameters.AddWithValue("@ItemDes", 项目描述);
                     command.Parameters.AddWithValue("@Uom", 单位);
                     command.Parameters.AddWithValue("@ItemValue", 采集值);
-                    command.Parameters.AddWithValue("@IsOk", isok);
-                    command.Parameters.AddWithValue("@GroupNum", DateTime.Now.ToString("yyyyMMddhhmmssff"));
-                    command.Parameters.AddWithValue("@CreateTime", DateTime.Now);
+                    command.Parameters.AddWithValue("@IsOk", Convert.ToInt16(isok));
+                    command.Parameters.AddWithValue("@GroupNum", long.Parse( 时间组号));
+                    //command.Parameters.AddWithValue("@GroupNum", DateTime.Now.ToString("yyyyMMddhhmmssff"));
+                    //command.Parameters.AddWithValue("@CreateTime", DateTime.Now);
+                    command.Parameters.AddWithValue("@CreateTime", 时间);
 
                     await command.ExecuteNonQueryAsync();
                     logger.Debug("工艺质量添加数据成功！");
@@ -209,7 +254,24 @@ namespace MonitorApp.Model
 
         }
 
+        public static void LoadIni()
+        {
+            if (File.Exists(GlobalFile))
+            {
+                //DXH.Ini.DXHIni.ContentReader("System", "Banci", "Null", GlobalFile);
+                DXH.Ini.DXHIni.TryToInt(ref mRunTimes, DXH.Ini.DXHIni.ContentReader("System", "RunTimes", "Null", GlobalFile));
+                DXH.Ini.DXHIni.TryToInt(ref mStopTimes, DXH.Ini.DXHIni.ContentReader("System", "StopTimes", "Null", GlobalFile));
+                DXH.Ini.DXHIni.TryToInt(ref mWaitTimes, DXH.Ini.DXHIni.ContentReader("System", "WaitTimes", "Null", GlobalFile));
+            }
+            else
+            {
+                //Banci = mBanci;
+                RunTimes = mRunTimes;
+                StopTimes = mStopTimes;
+                WaitTimes = mWaitTimes;
+            }
+        }
         #endregion
-        
+
     }
 }

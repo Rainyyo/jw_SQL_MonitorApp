@@ -357,14 +357,14 @@ namespace MonitorApp.ViewModels
             MySQL_ConnectionMsg();
             Global.Ini();
 
-            Banci = DXH.Ini.DXHIni.ContentReader("System", "Banci", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
-            RunTimes = Convert.ToInt32(DXH.Ini.DXHIni.ContentReader("System", "RunTimes", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini")));
-            StopTimes = Convert.ToInt32(DXH.Ini.DXHIni.ContentReader("System", "StopTimes", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini")));
-            WaitTimes = Convert.ToInt32(DXH.Ini.DXHIni.ContentReader("System", "WaitTimes", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini")));
+            //Banci = DXH.Ini.DXHIni.ContentReader("System", "Banci", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
+            //RunTimes = Convert.ToInt32(DXH.Ini.DXHIni.ContentReader("System", "RunTimes", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini")));
+            //StopTimes = Convert.ToInt32(DXH.Ini.DXHIni.ContentReader("System", "StopTimes", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini")));
+            //WaitTimes = Convert.ToInt32(DXH.Ini.DXHIni.ContentReader("System", "WaitTimes", "Null", System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini")));
 
 
             Add_SQL_data_alarm();
-            SetTimer(); //换班计时器
+            //SetTimer(); //换班计时器
             SetTimer2();//设备状态监控计时器
         }
         #endregion
@@ -654,40 +654,67 @@ namespace MonitorApp.ViewModels
             MonitorMachineStatustimer.Enabled = true;
         }
 
-        private void MonitorMachineStatus_Elapsed(object sender, ElapsedEventArgs e)
+        private async void MonitorMachineStatus_Elapsed(object sender, ElapsedEventArgs e)
         {
+            var time1 = DateTime.Now;
+            var time2 = time1.ToString("yyyyMMddhhmmssff");
 
-            var LoadSatet = pLC.ReadMCoils(Settings.Default.待料, 1);
-            var Producting = pLC.ReadMCoils(Settings.Default.生产, 1);
-            var Pause = pLC.ReadMCoils(Settings.Default.暂停, 1);
+            //var LoadSatet = pLC.ReadMCoils(Settings.Default.待料, 1);
+            //var Producting = pLC.ReadMCoils(Settings.Default.生产, 1);
+            //var Pause = pLC.ReadMCoils(Settings.Default.暂停, 1);
             //var Stop = pLC.ReadMCoils(Settings.Default.急停, 1);
-            if (LoadSatet[0])
+            var Producting = pLC.ReadDRegisters(7062,1);//运行
+            var LoadSatet = pLC.ReadDRegisters(7063,1);//待机
+            var Pause = pLC.ReadDRegisters(7064,1);//报警
+            //if (LoadSatet[0])
+            //{
+            //    WaitTimes++;
+            //}
+            //if (Producting[0])
+            //{
+            //    RunTimes++;
+            //}
+            //if (Pause[0])
+            //{
+            //    StopTimes++;
+            //}
+            //WriteFile();
+            var res1 = await Global.Insert_pc_data_craft("WAIT_TIME", "当班待机时间", "min", LoadSatet[0], time2, time1);
+            if (res1 == "ok")
             {
-                WaitTimes++;
-                
+                //addMessage("当班待机时间写入成功！");
+            }
+            else
+            {
+                addMessage("当班待机时间写入成功失败！" + res1);
+            }
+            var res2 = await Global.Insert_pc_data_craft("RUN_TIME", "当班运行时间", "min", Producting[0], time2, time1);
+            if (res2 == "ok")
+            {
+                //addMessage("当班运行时间写入成功！");
+            }
+            else
+            {
+                addMessage("当班运行时间写入成功失败！" + res2);
+            }
+            var res3 = await Global.Insert_pc_data_craft("ALARM_TIME", "当班报警时间", "min", Pause[0], time2, time1);
+            if (res3 == "ok")
+            {
+                //addMessage("当班报警时间写入成功！");
+            }
+            else
+            {
+                addMessage("当班报警时间写入成功失败！" + res3);
             }
 
-            if (Producting[0])
-            {
-                RunTimes++;
-                Global.Insert_pc_data_craft("LOT001", "SETID001","RUN_TIME","当班运行时间","min","0", RunTimes.ToString());
-            }
-
-            if (Pause[0])
-            {
-                StopTimes++;
-            }
-            WriteFile();
-            
         }
-
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             var _banci = GetBanci();
-            if (_banci == Banci)
+            if (_banci == "08000000" || _banci == "20000000")
             {
-                Banci = _banci;
-                addMessage($"\"{Banci}\"换班数据清零");
+                //Banci = _banci;
+                addMessage($"换班数据清零");
                 RunTimes = 0;
                 StopTimes = 0;
                 WaitTimes = 0;
@@ -699,22 +726,13 @@ namespace MonitorApp.ViewModels
         {
             try
             {
-                //DateTime now = DateTime.Now;
-
-                //// 计算到下一次早上8点和晚上8点的时间间隔
-                //NextMorningReset = now.Date.AddHours(8);
-                //NextEveningReset = now.Date.AddHours(20);
-                //DXH.Ini.DXHIni.WritePrivateProfileString("System", "NextMorningReset", NextMorningReset.ToString(), System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
-                //DXH.Ini.DXHIni.WritePrivateProfileString("System", "NextEveningReset", NextEveningReset.ToString(), System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
-
-                DXH.Ini.DXHIni.WritePrivateProfileString("System", "Banci", Banci, System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
                 DXH.Ini.DXHIni.WritePrivateProfileString("System", "RunTimes", RunTimes.ToString(), System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
                 DXH.Ini.DXHIni.WritePrivateProfileString("System", "StopTimes", StopTimes.ToString(), System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
                 DXH.Ini.DXHIni.WritePrivateProfileString("System", "WaitTimes", WaitTimes.ToString(), System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Count.ini"));
             }
             catch (Exception ex)
             {
-                addMessage(ex.Message);
+                addMessage("WriteFile_Ini"+ex.Message);
             }
         }
         public string GetBanci()
@@ -723,19 +741,19 @@ namespace MonitorApp.ViewModels
             if (DateTime.Now.Hour >= 8 && DateTime.Now.Hour < 20)
             {
                 //rs += DateTime.Now.ToString("yyyyMMddHHmmssff") ;
-                rs += DateTime.Now.ToString("HHmmss");
+                rs += DateTime.Now.ToString("HHmmssff");
             }
             else
             {
                 if (DateTime.Now.Hour >= 0 && DateTime.Now.Hour < 8)
                 {
                     //rs += DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssff") ;
-                    rs += DateTime.Now.AddDays(-1).ToString("HHmmss");
+                    rs += DateTime.Now.AddDays(-1).ToString("HHmmssff");
                 }
                 else
                 {
                     //rs += DateTime.Now.ToString("yyyyMMddHHmmssff");
-                    rs += DateTime.Now.ToString("HHmmss");
+                    rs += DateTime.Now.ToString("HHmmssff");
                 }
             }
             return rs;

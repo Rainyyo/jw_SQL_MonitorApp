@@ -1,6 +1,8 @@
 ﻿
 using System.Text;
 using System.Runtime.InteropServices;
+using FreeSql.Internal;
+using System;
 
 namespace DXH.Ini
 {
@@ -26,5 +28,35 @@ namespace DXH.Ini
             string mpKeyName,
             string mpDefault,
             string mpFileName);
+        public static void TryToInt(ref int d, string str)
+        {
+            try
+            {
+                d = Convert.ToInt32(str);
+            }
+            catch
+            {
+            }
+        }
+        public static void TryToDouble(ref double d, string str)
+        {
+            try
+            {
+                d = Convert.ToDouble(str);
+            }
+            catch
+            {
+            }
+        }
+        public static void TryToBool(ref bool d, string str)
+        {
+            try
+            {
+                d = Convert.ToBoolean(str);
+            }
+            catch
+            {
+            }
+        }
     }
 }
