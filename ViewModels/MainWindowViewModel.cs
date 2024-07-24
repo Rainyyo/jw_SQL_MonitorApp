@@ -27,6 +27,9 @@ using OfficeOpenXml;
 using System.Collections.Concurrent;
 using System.Timers;
 using System.Formats.Asn1;
+using Org.BouncyCastle.Utilities.IO.Pem;
+using Serilog;
+using System.Xml;
 
 namespace MonitorApp.ViewModels
 {
@@ -133,6 +136,19 @@ namespace MonitorApp.ViewModels
             get { return banci; }
             set { SetProperty(ref banci, value); }
         }
+
+        private string lOT;
+        public string LOT
+        {
+            get { return lOT; }
+            set { SetProperty(ref lOT, value); }
+        }
+        private string sETID;
+        public string SETID
+        {
+            get { return sETID; }
+            set { SetProperty(ref sETID, value); }
+        }
         #endregion
         #region 命令绑定
         private DelegateCommand appLoadedEventCommand;
@@ -153,6 +169,26 @@ namespace MonitorApp.ViewModels
         private DelegateCommand clickState;
         public DelegateCommand ClickState =>
            clickState ?? (clickState = new DelegateCommand(ExecuteClickState));
+        private DelegateCommand<object> textBoxLostFocusCommand;
+        public DelegateCommand<object> TextBoxLostFocusCommand =>
+            textBoxLostFocusCommand ?? (textBoxLostFocusCommand = new DelegateCommand<object>(ExecuteTextBoxLostFocusCommand));
+        void ExecuteTextBoxLostFocusCommand(object obj)
+        {
+            if (obj is string str)
+            {
+                switch (str)
+                {
+                    case "批次号":
+                        Settings.Default.LOT = LOT;
+                        break;
+
+                    case "板号":
+                        Settings.Default.SETID = SETID;
+                        break;
+                }
+                Properties.Settings.Default.Save();
+            }
+        }
         void ExecuteMenuCommand(object obj)
         {
             switch (obj.ToString())
@@ -287,6 +323,8 @@ namespace MonitorApp.ViewModels
         void ExecuteAppLoadedEventCommand()
         {
             FileName = Properties.Settings.Default.Filer;
+            LOT = Settings.Default.LOT;
+            SETID=Settings.Default.SETID;
             addMessage("软件打开！");
             Task.Run(() =>
             {
@@ -335,6 +373,11 @@ namespace MonitorApp.ViewModels
                     addMessage("连接到数据库时出错！");
                 }
             });
+            var time1 = DateTime.Now;
+            var time2 = time1.ToString("yyyyMMddhhmmssff");
+            var value = time1.ToString("yyMMdd");
+            var res1 =  Global.Insert_pc_data_craft("VER_DATE", "软件版本", "/", value, time2, time1, LOT,SETID);
+            
         }
         void ExecuteAppClosedEventCommand()
         {
@@ -350,7 +393,8 @@ namespace MonitorApp.ViewModels
         #region 构造函数
         public MainWindowViewModel(IContainerProvider containerProvider)
         {
-
+            LOT = Settings.Default.LOT;
+            SETID = Settings.Default.SETID;
             pLC = containerProvider.Resolve<IPLCService>("PLC");//初始化
             _dialogService = containerProvider.Resolve<IDialogService>();
             AppName = Settings.Default.AppName;
@@ -679,7 +723,7 @@ namespace MonitorApp.ViewModels
             //    StopTimes++;
             //}
             //WriteFile();
-            var res1 = await Global.Insert_pc_data_craft("WAIT_TIME", "当班待机时间", "min", LoadSatet[0], time2, time1);
+            var res1 = await Global.Insert_pc_data_craft("WAIT_TIME", "当班待机时间", "min", LoadSatet[0].ToString(), time2, time1,LOT,SETID);
             if (res1 == "ok")
             {
                 //addMessage("当班待机时间写入成功！");
@@ -688,7 +732,7 @@ namespace MonitorApp.ViewModels
             {
                 addMessage("当班待机时间写入成功失败！" + res1);
             }
-            var res2 = await Global.Insert_pc_data_craft("RUN_TIME", "当班运行时间", "min", Producting[0], time2, time1);
+            var res2 = await Global.Insert_pc_data_craft("RUN_TIME", "当班运行时间", "min", Producting[0].ToString(), time2, time1, LOT, SETID);
             if (res2 == "ok")
             {
                 //addMessage("当班运行时间写入成功！");
@@ -697,7 +741,7 @@ namespace MonitorApp.ViewModels
             {
                 addMessage("当班运行时间写入成功失败！" + res2);
             }
-            var res3 = await Global.Insert_pc_data_craft("ALARM_TIME", "当班报警时间", "min", Pause[0], time2, time1);
+            var res3 = await Global.Insert_pc_data_craft("ALARM_TIME", "当班报警时间", "min", Pause[0].ToString(), time2, time1, LOT, SETID);
             if (res3 == "ok")
             {
                 //addMessage("当班报警时间写入成功！");

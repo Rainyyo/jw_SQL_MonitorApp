@@ -44,5 +44,11 @@
     <Setting Name="AppName" Type="System.String" Scope="User">
       <Value Profile="(Default)">CCS_</Value>
     </Setting>
+    <Setting Name="SETID" Type="System.String" Scope="User">
+      <Value Profile="(Default)">SETID</Value>
+    </Setting>
+    <Setting Name="LOT" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LOT</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

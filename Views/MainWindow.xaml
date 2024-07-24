@@ -87,6 +87,24 @@
                     <Grid Grid.Row="2">
                         <GroupBox Header="上机操作" FontSize="20">
                             <StackPanel>
+                                <TextBlock Text="批次号:" FontSize="20" Margin="6"/>
+                                <TextBox Text="{Binding LOT}" Height="30" Margin="5">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="LostFocus">
+                                            <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="批次号" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                                <TextBlock Text="板号:" FontSize="20" Margin="6"/>
+                                <TextBox Text="{Binding SETID}" Height="30" Margin="5">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="LostFocus">
+                                            <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="板号" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+
+
                                 <TextBlock Text="工号:" FontSize="20" Margin="6"/>
                                 <TextBox Text="{Binding ID}" Height="30" Margin="5"/>
                                 <TextBlock Text="姓名:"/>

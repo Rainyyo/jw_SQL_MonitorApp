@@ -214,7 +214,7 @@ namespace MonitorApp.Model
                 }
             }
         }
-        public static async Task<string> Insert_pc_data_craft(string 项目代码, string 项目描述, string 单位, int 采集值, string 时间组号, DateTime 时间, string 批次号 = "LOT001", string 版号 = "SETID001", bool isok = false)//工艺质量
+        public static async Task<string> Insert_pc_data_craft(string 项目代码, string 项目描述, string 单位, string 采集值, string 时间组号, DateTime 时间, string 批次号 = "", string 版号 = "", bool isok = false)//工艺质量
         {
             await Task.Delay(100);
             MySQL_ConnectionMsg();
