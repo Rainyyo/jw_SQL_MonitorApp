@@ -1,123 +1,98 @@
-﻿<UserControl x:Class="MonitorApp.Views.ParameterDialog"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:local="clr-namespace:MonitorApp.Views"
-             xmlns:prism="http://prismlibrary.com/"
-             mc:Ignorable="d" 
-             d:DesignHeight="250" d:DesignWidth="400">
+﻿<UserControl
+    x:Class="MonitorApp.Views.ParameterDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:local="clr-namespace:MonitorApp.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    d:DesignHeight="250"
+    d:DesignWidth="600"
+    mc:Ignorable="d">
     <prism:Dialog.WindowStyle>
         <Style TargetType="Window">
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterScreen" />
             <Setter Property="ResizeMode" Value="NoResize" />
-            <Setter Property="Width" Value="400" />
-            <Setter Property="Height" Value="350" />
+            <Setter Property="Width" Value="600" />
+            <Setter Property="Height" Value="250" />
         </Style>
     </prism:Dialog.WindowStyle>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition/>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition />
         </Grid.RowDefinitions>
-        <GroupBox Header="PLC地址">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="IP:"/>
-                <TextBox Text="{Binding IP}"
-                         Width="150"
-                         Margin="5">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="LostFocus">
-                            <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="IP" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </TextBox>
-            </StackPanel>
-        </GroupBox>
-                  
-        <GroupBox Header="PLC报警参数配置" Grid.Row="1">
+        <GroupBox Header="MES参数设置">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="起始地址:"/>
-                    <TextBox Text="{Binding StartAddr}"
-                             Width="40"
-                             Margin="5">
+                    <Label Content="设备码:" />
+                    <TextBox
+                        Width="100"
+                        Margin="5"
+                        d:Text="PNT_TESTING"
+                        Text="{Binding ID}">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="LostFocus">
-                                <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="起始地址" />
+                                <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="ID" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                     </TextBox>
-                    <Label  Content="点位个数:"/>
-                    <TextBox Text="{Binding CountAddr}"
-                             Width="40"
-                             Margin="5">
+                    <Label Content="托盘码:" />
+                    <TextBox
+                        Width="100"
+                        Margin="5"
+                        d:Text="052"
+                        Text="{Binding Tary}">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="LostFocus">
-                                <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="点位个数" />
+                                <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="Tary" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </TextBox>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="本地测试文件目录:" />
+                        <TextBox
+                            Width="260"
+                            Margin="5"
+                            IsEnabled="False"
+                            Text="{Binding FilePath}" />
+                        <Button
+                            Width="50"
+                            Margin="5"
+                            Command="{Binding LoadFile}"
+                            CommandParameter="测试文件"
+                            Content="打开" />
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="进站URL:" />
+                    <TextBox
+                        Width="460"
+                        Margin="5"
+                        d:Text="http://192.168.2.253:48080/admin-api/mes/pallet-process/test-in-single"
+                        Text="{Binding URL_PostIn}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="LostFocus">
+                                <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="URL_PostIn" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                     </TextBox>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" >
-                    <Label Content="报警文件路径:"/>
-                    <TextBox Text="{Binding FilePath}" Height="20" Width="200" Margin="5" IsReadOnly="True"/>
-                    <Button Content="打开" Command="{Binding LoadFile}" Height="20" Width="50" Margin="5"/>
-                </StackPanel>
-
-            </StackPanel>
-        </GroupBox>
-        <GroupBox Header="#" Grid.Row="2">
-            <StackPanel>
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="待料"/>
-                        <TextBox Height="15"
-                  Width="40"
-                  Margin="5"
-                  Text="{Binding LoadState}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="LostFocus">
-                                    <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="待料" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </TextBox>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="生产"/>
-                        <TextBox Height="15"
-                  Width="40"
-                  Margin="5"
-                  Text="{Binding Producting}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="LostFocus">
-                                    <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="生产" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </TextBox>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="暂停"/>
-                        <TextBox Height="15" Width="40" Margin="5" Text="{Binding Pause}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="LostFocus">
-                                    <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="暂停" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </TextBox>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="急停"/>
-                        <TextBox Height="15" Width="40" Margin="5" Text="{Binding Stop}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="LostFocus">
-                                    <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="急停" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </TextBox>
-                    </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="出站URL:" />
+                    <TextBox
+                        Width="460"
+                        Margin="5"
+                        d:Text="http://192.168.2.253:48080/admin-api/mes/pallet-process/test-out-single"
+                        Text="{Binding URL_PostOut}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="LostFocus">
+                                <i:InvokeCommandAction Command="{Binding TextBoxLostFocusCommand}" CommandParameter="URL_PostOut" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </TextBox>
                 </StackPanel>
             </StackPanel>
         </GroupBox>

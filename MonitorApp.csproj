@@ -13,6 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BingLibraryLite" Version="2.2.4-pre" />
+    <PackageReference Include="CustomSelectFileDlg" Version="1.0.0" />
     <PackageReference Include="EPPlus" Version="7.0.10" />
     <PackageReference Include="MySql.Data" Version="8.3.0" />
     <PackageReference Include="NLog" Version="5.2.8" />

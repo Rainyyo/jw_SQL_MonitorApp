@@ -1,12 +1,9 @@
-﻿using Prism.Commands;
-using Prism.Ioc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Win32;
 using MonitorApp.Properties;
-using Microsoft.Win32;
+using Prism.Commands;
+using Prism.Ioc;
+using Prism.Services.Dialogs;
+using System;
 using System.Windows;
 
 namespace MonitorApp.ViewModels
@@ -14,23 +11,29 @@ namespace MonitorApp.ViewModels
     public class ParameterDialogViewModel : DialogViewModel
     {
         #region 属性
-        private string ip;
-        public string IP
+        private string _ID;
+        public string ID
         {
-            get { return ip; }
-            set { SetProperty(ref ip, value); }
+            get { return _ID; }
+            set { SetProperty(ref _ID, value); }
         }
-        private int startAddr;
-        public int StartAddr
+        private string _Tary;
+        public string Tary
         {
-            get { return startAddr; }
-            set { SetProperty(ref startAddr, value); }
+            get { return _Tary; }
+            set { SetProperty(ref _Tary, value); }
         }
-        private int countAddr;
-        public int CountAddr
+        private string _URL_PostIn;
+        public string URL_PostIn
         {
-            get { return countAddr; }
-            set { SetProperty(ref countAddr, value); }
+            get { return _URL_PostIn; }
+            set { SetProperty(ref _URL_PostIn, value); }
+        }
+        private string _URL_PostOut;
+        public string URL_PostOut
+        {
+            get { return _URL_PostOut; }
+            set { SetProperty(ref _URL_PostOut, value); }
         }
         private string filePath;
         public string FilePath
@@ -38,61 +41,33 @@ namespace MonitorApp.ViewModels
             get { return filePath; }
             set { SetProperty(ref filePath, value); }
         }
-
-
-        private int loadState;
-        public int LoadState
-        {
-            get { return loadState; }
-            set { SetProperty(ref loadState, value); }
-        }
-        private int producting;
-        public int Producting
-        {
-            get { return producting; }
-            set { SetProperty(ref producting, value); }
-        }
-        private int pause;
-        public int Pause
-        {
-            get { return pause; }
-            set { SetProperty(ref pause, value); }
-        }
-        private int stop;
-        public int Stop
-        {
-            get { return stop; }
-            set { SetProperty(ref stop, value); }
-        }
-        
         #endregion
         #region 方法
-        private DelegateCommand loadFile;
-        public DelegateCommand LoadFile =>
-            loadFile ?? (loadFile = new DelegateCommand(ExecuteLoadFile));
+        private DelegateCommand<object> loadFile;
+        public DelegateCommand<object> LoadFile =>
+            loadFile ?? (loadFile = new DelegateCommand<object>(ExecuteLoadFile));
 
-        void ExecuteLoadFile()
+        void ExecuteLoadFile(object obj)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "CSV文件 (*.csv)|*.csv";
-            //openFileDialog.Filter = "CSV 文件 (*.csv)|*.csv|所有文件 (*.*)|*.*";
-
-            openFileDialog.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory + "报警文件"; // 可选：设置初始目录
-            bool? result = openFileDialog.ShowDialog();
-
-            if (result == true)
+            if (obj is string str)
             {
-                FilePath = openFileDialog.FileName;
-                // 这里可以继续处理选择的文件，比如读取文件内容等操作
-                Properties.Settings.Default.Filer = FilePath;
-                Properties.Settings.Default.Save();
-            }
-            MessageBoxResult messageBoxResult = MessageBox.Show("请重启软件加载配置！！！", "消息", MessageBoxButton.OKCancel);
-            if (messageBoxResult == MessageBoxResult.OK)
-            {
-                Environment.Exit(0);
+                switch (str)
+                {
+                    case "测试文件":
+                        var dialog = new System.Windows.Forms.FolderBrowserDialog();
+                        dialog.Description = "请选择CSV文件夹";
+                        dialog.ShowDialog();
+                        if (!string.IsNullOrEmpty(dialog.SelectedPath))
+                        {
+                            FilePath = dialog.SelectedPath;
+                            Settings.Default.FolderPath = FilePath;
+                            Settings.Default.Save();
+                        }
+                        break;
+                }
             }
         }
+
         private DelegateCommand<object> textBoxLostFocusCommand;
         public DelegateCommand<object> TextBoxLostFocusCommand =>
             textBoxLostFocusCommand ?? (textBoxLostFocusCommand = new DelegateCommand<object>(ExecuteTextBoxLostFocusCommand));
@@ -102,32 +77,20 @@ namespace MonitorApp.ViewModels
             {
                 switch (str)
                 {
-                    case "IP":
-                        Settings.Default.PLC= IP;
+                    case "ID":
+                        Settings.Default.ID= ID;
                         break;
-
-                    case "起始地址":
-                        Settings.Default.报警起始地址 = StartAddr;
+                    case "Tary":
+                        Settings.Default.Tary = Tary;
                         break;
-                    case "点位个数":
-                        Settings.Default.报警点位个数 = CountAddr;
+                    case "URL_PostIn":
+                        Settings.Default.URL_PostIn = URL_PostIn;
                         break;
-
-
-                    case "待料":
-                        Settings.Default.待料 = LoadState;
-                        break;
-                    case "生产":
-                        Settings.Default.生产 = Producting;
-                        break;
-                    case "暂停":
-                        Settings.Default.暂停 = Pause;
-                        break;
-                    case "急停":
-                        Settings.Default.急停 = Stop;
+                    case "URL_PostOut":
+                        Settings.Default.URL_PostOut = URL_PostOut;
                         break;
                 }
-                
+                Settings.Default.Save();
             }
         }
         #endregion
@@ -135,16 +98,11 @@ namespace MonitorApp.ViewModels
         public ParameterDialogViewModel(IContainerProvider containerProvider) : base(containerProvider)
         {
             Title = "参数设置";
-            IP = Settings.Default.PLC;
-
-            StartAddr = Settings.Default.报警起始地址;
-            CountAddr = Settings.Default.报警点位个数;
-            FilePath = Settings.Default.Filer;
-
-            LoadState = Settings.Default.待料;
-            Producting = Settings.Default.生产;
-            Pause = Settings.Default.暂停;
-            Stop = Settings.Default.急停;
+            ID = Settings.Default.ID;
+            URL_PostIn = Settings.Default.URL_PostIn;
+            URL_PostOut = Settings.Default.URL_PostOut;
+            FilePath=Settings.Default.Filer;
+            Tary = Settings.Default.Tary;
         }
         #endregion
 

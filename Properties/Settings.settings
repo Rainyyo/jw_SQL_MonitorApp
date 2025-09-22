@@ -2,53 +2,23 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MonitorApp.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="PLC" Type="System.String" Scope="User">
-      <Value Profile="(Default)">127.0.0.1</Value>
+    <Setting Name="ID" Type="System.String" Scope="User">
+      <Value Profile="(Default)">PNT TESTING</Value>
+    </Setting>
+    <Setting Name="URL_PostIn" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://192.168.2.253:48080/admin-api/mes/pallet-process/test-in-single</Value>
+    </Setting>
+    <Setting Name="URL_PostOut" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://192.168.2.253:48080/admin-api/mes/pallet-process/test-out-single</Value>
     </Setting>
     <Setting Name="Filer" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\\</Value>
+      <Value Profile="(Default)">D:/</Value>
     </Setting>
-    <Setting Name="MySQL_UserID" Type="System.String" Scope="User">
-      <Value Profile="(Default)">root</Value>
+    <Setting Name="FolderPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">D:/</Value>
     </Setting>
-    <Setting Name="MySQL_Port" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">3306</Value>
-    </Setting>
-    <Setting Name="MySQL_Password" Type="System.String" Scope="User">
-      <Value Profile="(Default)">123456</Value>
-    </Setting>
-    <Setting Name="MySQL_Server" Type="System.String" Scope="User">
-      <Value Profile="(Default)">localhost</Value>
-    </Setting>
-    <Setting Name="MySQL_Database" Type="System.String" Scope="User">
-      <Value Profile="(Default)">jw-eap</Value>
-    </Setting>
-    <Setting Name="待料" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">60</Value>
-    </Setting>
-    <Setting Name="生产" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">70</Value>
-    </Setting>
-    <Setting Name="暂停" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">100</Value>
-    </Setting>
-    <Setting Name="急停" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">22</Value>
-    </Setting>
-    <Setting Name="报警起始地址" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">101</Value>
-    </Setting>
-    <Setting Name="报警点位个数" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">100</Value>
-    </Setting>
-    <Setting Name="AppName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">CCS_</Value>
-    </Setting>
-    <Setting Name="SETID" Type="System.String" Scope="User">
-      <Value Profile="(Default)">SETID</Value>
-    </Setting>
-    <Setting Name="LOT" Type="System.String" Scope="User">
-      <Value Profile="(Default)">LOT</Value>
+    <Setting Name="Tary" Type="System.String" Scope="User">
+      <Value Profile="(Default)">052</Value>
     </Setting>
   </Settings>
 </SettingsFile>

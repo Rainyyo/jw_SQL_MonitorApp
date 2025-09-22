@@ -97,11 +97,11 @@ namespace MonitorApp.Model
         public static void MySQL_ConnectionMsg()//数据库连接的构建
         {
             //构建连接字符串
-            builder.Server = Settings.Default.MySQL_Server;
-            builder.Port = Convert.ToUInt32(Settings.Default.MySQL_Port);
-            builder.UserID = Settings.Default.MySQL_UserID;
-            builder.Password = Settings.Default.MySQL_Password;
-            builder.Database = Settings.Default.MySQL_Database;
+            //builder.Server = Settings.Default.MySQL_Server;
+            //builder.Port = Convert.ToUInt32(Settings.Default.MySQL_Port);
+            //builder.UserID = Settings.Default.MySQL_UserID;
+            //builder.Password = Settings.Default.MySQL_Password;
+            //builder.Database = Settings.Default.MySQL_Database;
             builder.CharacterSet = "gb2312";
         }
         public static string Insert_pc_data_emp(string 员工号, string 员工姓名, string 操作代码, string 操作名称)//员工上下机记录上传

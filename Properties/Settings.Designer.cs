@@ -12,7 +12,7 @@ namespace MonitorApp.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.10.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.14.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -25,19 +25,43 @@ namespace MonitorApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
-        public string PLC {
+        [global::System.Configuration.DefaultSettingValueAttribute("PNT TESTING")]
+        public string ID {
             get {
-                return ((string)(this["PLC"]));
+                return ((string)(this["ID"]));
             }
             set {
-                this["PLC"] = value;
+                this["ID"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\\\")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://192.168.2.253:48080/admin-api/mes/pallet-process/test-in-single")]
+        public string URL_PostIn {
+            get {
+                return ((string)(this["URL_PostIn"]));
+            }
+            set {
+                this["URL_PostIn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://192.168.2.253:48080/admin-api/mes/pallet-process/test-out-single")]
+        public string URL_PostOut {
+            get {
+                return ((string)(this["URL_PostOut"]));
+            }
+            set {
+                this["URL_PostOut"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("D:/")]
         public string Filer {
             get {
                 return ((string)(this["Filer"]));
@@ -49,169 +73,25 @@ namespace MonitorApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("root")]
-        public string MySQL_UserID {
+        [global::System.Configuration.DefaultSettingValueAttribute("D:/")]
+        public string FolderPath {
             get {
-                return ((string)(this["MySQL_UserID"]));
+                return ((string)(this["FolderPath"]));
             }
             set {
-                this["MySQL_UserID"] = value;
+                this["FolderPath"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("3306")]
-        public int MySQL_Port {
+        [global::System.Configuration.DefaultSettingValueAttribute("052")]
+        public string Tary {
             get {
-                return ((int)(this["MySQL_Port"]));
+                return ((string)(this["Tary"]));
             }
             set {
-                this["MySQL_Port"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("123456")]
-        public string MySQL_Password {
-            get {
-                return ((string)(this["MySQL_Password"]));
-            }
-            set {
-                this["MySQL_Password"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
-        public string MySQL_Server {
-            get {
-                return ((string)(this["MySQL_Server"]));
-            }
-            set {
-                this["MySQL_Server"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("jw-eap")]
-        public string MySQL_Database {
-            get {
-                return ((string)(this["MySQL_Database"]));
-            }
-            set {
-                this["MySQL_Database"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("60")]
-        public int 待料 {
-            get {
-                return ((int)(this["待料"]));
-            }
-            set {
-                this["待料"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("70")]
-        public int 生产 {
-            get {
-                return ((int)(this["生产"]));
-            }
-            set {
-                this["生产"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100")]
-        public int 暂停 {
-            get {
-                return ((int)(this["暂停"]));
-            }
-            set {
-                this["暂停"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("22")]
-        public int 急停 {
-            get {
-                return ((int)(this["急停"]));
-            }
-            set {
-                this["急停"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("101")]
-        public int 报警起始地址 {
-            get {
-                return ((int)(this["报警起始地址"]));
-            }
-            set {
-                this["报警起始地址"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100")]
-        public int 报警点位个数 {
-            get {
-                return ((int)(this["报警点位个数"]));
-            }
-            set {
-                this["报警点位个数"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("CCS_")]
-        public string AppName {
-            get {
-                return ((string)(this["AppName"]));
-            }
-            set {
-                this["AppName"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("SETID")]
-        public string SETID {
-            get {
-                return ((string)(this["SETID"]));
-            }
-            set {
-                this["SETID"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("LOT")]
-        public string LOT {
-            get {
-                return ((string)(this["LOT"]));
-            }
-            set {
-                this["LOT"] = value;
+                this["Tary"] = value;
             }
         }
     }
