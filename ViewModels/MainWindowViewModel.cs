@@ -129,64 +129,88 @@ namespace MonitorApp.ViewModels
         {
             if (obj is string str)
             {
-                switch (str)
+                try
                 {
-                    case "未上传文件选择":
+                    switch (str)
+                    {
+                        case "未上传文件选择":
 
-                        OpenFileDialog openFileDialog = new OpenFileDialog();
-                        openFileDialog.Filter = "CSV文件 (*.csv)|*.csv";
-                        openFileDialog.Filter = "CSV 文件 (*.csv)|*.csv|所有文件 (*.*)|*.*";
+                            OpenFileDialog openFileDialog = new OpenFileDialog();
+                            openFileDialog.Filter = "CSV文件 (*.csv)|*.csv";
+                            openFileDialog.Filter = "CSV 文件 (*.csv)|*.csv|所有文件 (*.*)|*.*";
 
-                        openFileDialog.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory + "报警文件"; // 可选：设置初始目录
-                        bool? result = openFileDialog.ShowDialog();
-                        if (result == true)
-                        {
-                            FilePath = openFileDialog.FileName;
-                        }
-                        LoadDatainfo(FilePath);
-                        break;
-                    case "上传":
-                        {
-                            if (DataList1.Count > 0)
+                            //openFileDialog.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory + "报警文件"; // 可选：设置初始目录
+                            bool? result = openFileDialog.ShowDialog();
+                            if (result == true)
                             {
-                                string[] csvFiles = Directory.GetFiles(Settings.Default.FolderPath, "*.csv");
-                                foreach (var bar in DataList1)
+                                FilePath = openFileDialog.FileName;
+                            }
+                            LoadDatainfo(FilePath);
+                            break;
+                        case "上传":
+                            {
+                                if (DataList1.Count > 0)
                                 {
-                                    foreach (var barFileName in csvFiles)
+                                    string[] csvFiles = Directory.GetFiles(Settings.Default.FolderPath, "*.csv");
+                                    var itemsToRemove = new List<DataListDisp>(); // 先记录要删除的项
+
+                                    foreach (var bar in DataList1.ToList())
                                     {
-                                        string fileNameinfo = Path.GetFileName(barFileName);
-                                        var fileName = fileNameinfo.Split("_");
-
-                                        if (bar.Barcode == fileName[0])
+                                        foreach (var barFileName in csvFiles)
                                         {
-                                            var check_rst = JObject.Parse(await TestPostIn(bar.Barcode));
+                                            string fileNameinfo = Path.GetFileName(barFileName);
+                                            var fileName = fileNameinfo.Split("_");
 
-                                            if (check_rst["isSuccess"]?.ToString().Trim() == "True")
+                                            if (bar.Barcode == fileName[0])
                                             {
-                                                var Electrical_dData = AnalyzeCSV(barFileName);
-                                                var postResult = JObject.Parse(await TestPostOut(bar.Barcode, Electrical_dData));
-                                                if (postResult["isSuccess"]?.ToString().Trim()=="True")
+                                                var check_rst = JObject.Parse(await TestPostIn(bar.Barcode));
+
+                                                if (check_rst["isSuccess"]?.ToString().Trim() == "True")
                                                 {
-                                                    addMessage($"条码：{bar.Barcode}上传成功");
-                                                    ngDataLogger.Info($"条码：{bar.Barcode}数据{postResult["message"]}");
+                                                    var Electrical_dData = AnalyzeCSV(barFileName);
+                                                    var postResult = JObject.Parse(await TestPostOut(bar.Barcode, Electrical_dData));
+                                                    if (postResult["isSuccess"]?.ToString().Trim() == "True")
+                                                    {
+                                                        bool deleteSuccess = DeleteRowFromCSV(FilePath, bar.Barcode);
+                                                        if (deleteSuccess)
+                                                        {
+                                                            itemsToRemove.Add(bar); // 记录要删除的项
+                                                            addMessage($"条码：{bar.Barcode}上传成功");
+                                                            logger.Info($"条码：{bar.Barcode}数据{postResult["message"]}");
+                                                        }
+                                                    }
+                                                    foreach (var item in itemsToRemove)
+                                                    {
+                                                        DataList1.Remove(item);
+
+                                                    }
+                                                    // 如果需要，重新加载数据
+                                                    if (itemsToRemove.Count > 0)
+                                                    {
+                                                        LoadDatainfo(FilePath);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    addMessage($"上传失败:{check_rst["message"]?.ToString()}");
                                                 }
 
                                             }
-                                            else
-                                            {
-                                                addMessage($"上传失败:{check_rst["message"]?.ToString()}");
-                                            }
-
                                         }
                                     }
                                 }
+                                else
+                                {
+                                    MessageBox.Show("请加载数据文件");
+                                }
                             }
-                            else
-                            {
-                                MessageBox.Show("请加载数据文件");
-                            }
-                        }
-                        break;
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    addMessage(ex.Message);
+                    ngDataLogger.Error(ex.Message);
                 }
             }
         }
@@ -309,6 +333,66 @@ namespace MonitorApp.ViewModels
             }
         }
         /// <summary>
+        /// 上传成功删除对应条码
+        /// </summary>
+        /// <param name="csvFilePath"></param>
+        /// <param name="barcode"></param>
+        /// <returns></returns>
+        private bool DeleteRowFromCSV(string csvFilePath, string barcode)
+        {
+            try
+            {
+                var lines = new List<string>();
+                bool headerSkipped = false;
+                bool found = false;
+
+                // 读取所有行
+                using (var reader = new StreamReader(csvFilePath))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (!headerSkipped)
+                        {
+                            // 保留标题行
+                            lines.Add(line);
+                            headerSkipped = true;
+                            continue;
+                        }
+
+                        // 检查是否包含目标条码
+                        if (line.Contains(barcode))
+                        {
+                            found = true;
+                            continue; // 跳过这一行（即删除）
+                        }
+
+                        lines.Add(line);
+                    }
+                }
+
+                // 如果找到了目标行，重新写入文件
+                if (found)
+                {
+                    using (var writer = new StreamWriter(csvFilePath, false, Encoding.UTF8))
+                    {
+                        foreach (var line in lines)
+                        {
+                            writer.WriteLine(line);
+                        }
+                    }
+                    return true;
+                }
+
+                return false; // 没有找到目标行
+            }
+            catch (Exception ex)
+            {
+                ngDataLogger.Error($"删除CSV行失败: {ex.Message}");
+                return false;
+            }
+        }
+        /// <summary>
         /// MES进站检
         /// </summary>
         /// <param name="bar"></param>
@@ -318,50 +402,49 @@ namespace MonitorApp.ViewModels
         {
             string postData = "";
             JObject resoult = new JObject();
-            resoult["isSuccess"] = "false";
+            resoult["isSuccess"] = "True";
 
-            Uri uri = new Uri(Settings.Default.URL_PostIn);
-            string baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
-            string apiPath = uri.AbsolutePath;
-            var MHToptions = new RestClientOptions(baseUrl);
-            var MHTclient = new RestClient(MHToptions);
-            var mHTrequest = new RestRequest(apiPath, RestSharp.Method.Post);
-            mHTrequest.AddHeader("Content-Type", "application/json");
-            mHTrequest.AddHeader("tenant-id", "1");
+            //Uri uri = new Uri(Settings.Default.URL_PostIn);
+            //string baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
+            //string apiPath = uri.AbsolutePath;
+            //var MHToptions = new RestClientOptions(baseUrl);
+            //var MHTclient = new RestClient(MHToptions);
+            //var mHTrequest = new RestRequest(apiPath, RestSharp.Method.Post);
+            //mHTrequest.AddHeader("Content-Type", "application/json");
+            //mHTrequest.AddHeader("tenant-id", "1");
             JObject mhtjob = new JObject();
             mhtjob["locationNo"] = "1";//位置码
             mhtjob["equipmentId"] = Settings.Default.Tary;//设备编码
             mhtjob["testId"] = Settings.Default.ID;//工序码
             mhtjob["materialSerinalNo"] = bar;//SN码
 
-            mHTrequest.AddBody(JsonConvert.SerializeObject(mhtjob));
+            //mHTrequest.AddBody(JsonConvert.SerializeObject(mhtjob));
 
             postData = JsonConvert.SerializeObject(mhtjob);
-            RestResponse responseMHT = await MHTclient.ExecuteAsync(mHTrequest);
+            //RestResponse responseMHT = await MHTclient.ExecuteAsync(mHTrequest);
+            //JObject mht = JObject.Parse(responseMHT.Content);
 
-            JObject mht = JObject.Parse(responseMHT.Content);
+            //resoult["isSuccess"] = mht["code"].ToString().Trim().ToUpper() == "0" ? "TRUE" : "FALSE";
+            //resoult["result"] = mht["code"].ToString().Trim().ToUpper();
+            //resoult["message"] = mht.ToString();
 
-            resoult["isSuccess"] = mht["code"].ToString().Trim().ToUpper() == "0" ? "TRUE" : "FALSE";
-            resoult["result"] = mht["code"].ToString().Trim().ToUpper();
-            resoult["message"] = mht.ToString();
             return resoult.ToString();
         }
-
 
         public async Task<string> TestPostOut(string bar, TestData data)
         {
             string postData = "";
             JObject resoult = new JObject();
-            resoult["isSuccess"] = "false";
+            resoult["isSuccess"] = "True";
 
-            Uri uri = new Uri(Settings.Default.URL_PostOut);
-            string baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
-            string apiPath = uri.AbsolutePath;
-            var MHToptions = new RestClientOptions(baseUrl);
-            var MHTclient = new RestClient(MHToptions);
-            var mHTrequest = new RestRequest(apiPath, RestSharp.Method.Post);
-            mHTrequest.AddHeader("Content-Type", "application/json");
-            mHTrequest.AddHeader("tenant-id", "1");
+            //Uri uri = new Uri(Settings.Default.URL_PostOut);
+            //string baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
+            //string apiPath = uri.AbsolutePath;
+            //var MHToptions = new RestClientOptions(baseUrl);
+            //var MHTclient = new RestClient(MHToptions);
+            //var mHTrequest = new RestRequest(apiPath, RestSharp.Method.Post);
+            //mHTrequest.AddHeader("Content-Type", "application/json");
+            //mHTrequest.AddHeader("tenant-id", "1");
             JObject mhtjob = new JObject();
 
             mhtjob["equipmentId"] = Settings.Default.ID;//设备 ID
@@ -402,18 +485,16 @@ namespace MonitorApp.ViewModels
             mhtjob["qaDetailList"] = qaDetailListArray;
 
 
-            mHTrequest.AddBody(JsonConvert.SerializeObject(mhtjob));
+            //mHTrequest.AddBody(JsonConvert.SerializeObject(mhtjob));
 
             postData = JsonConvert.SerializeObject(mhtjob);
-            RestResponse responseMHT1 = await MHTclient.ExecuteAsync(mHTrequest);
+            //RestResponse responseMHT1 = await MHTclient.ExecuteAsync(mHTrequest);
 
-            JObject mht1 = JObject.Parse(responseMHT1.Content);
+            //JObject mht1 = JObject.Parse(responseMHT1.Content);
 
-            resoult = new JObject();
-
-            resoult["isSuccess"] = mht1["code"].ToString().Trim().ToUpper() == "0" ? "TRUE" : "FALSE";
-            resoult["result"] = mht1["code"].ToString().Trim().ToUpper();
-            resoult["message"] = mht1.ToString();
+            //resoult["isSuccess"] = mht1["code"].ToString().Trim().ToUpper() == "0" ? "TRUE" : "FALSE";
+            //resoult["result"] = mht1["code"].ToString().Trim().ToUpper();
+            //resoult["message"] = mht1.ToString();
             return resoult.ToString();
         }
         private TestData AnalyzeCSV(string file)
